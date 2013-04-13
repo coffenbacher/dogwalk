@@ -1,4 +1,5 @@
 # Django settings for dogwalk project.
+import sys
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -11,8 +12,8 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '',                      # Or path to database file if using sqlite3.
+        'ENGINE': '', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'dogwalk',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -120,10 +121,9 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admin',
+    'south',
+    'dog'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -155,9 +155,23 @@ LOGGING = {
     }
 }
 
-# Parse database configuration from $DATABASE_URL
-import dj_database_url
-DATABASES['default'] =  dj_database_url.config()
-
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Parse database configuration from $DATABASE_URL
+db = {'username': 'postgres',
+      'password': 'beffy44',
+      'name': 'dogwalk',}
+
+import dj_database_url
+DATABASES['default'] = dj_database_url.config(
+                        default='postgres://%s:%s@localhost:5432/%s' % (
+                                db['username'], 
+                                db['password'], 
+                                db['name'])
+                        )
+
+if 'test' in sys.argv:
+    DATABASES['default'] = {'ENGINE': 'django.db.backends.sqlite3'}
+
+TEST_RUNNER = 'ignoretests.DjangoIgnoreTestSuiteRunner'
