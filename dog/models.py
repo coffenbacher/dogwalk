@@ -26,6 +26,9 @@ class RequiredWalk(TimeStampedModel):
     before = models.TimeField(verbose_name="Drop off before", null=True, blank=True)
     days = BitField(flags = DAYS)
 
+    def __unicode__(self):
+        return 'Required walk for %s' % self.dog
+
 class Walker(TimeStampedModel):
     name = models.CharField(max_length=200)
     address = models.TextField()
