@@ -15,7 +15,7 @@ class Dog(TimeStampedModel):
     name = models.CharField(max_length=200)
     address = models.TextField()
     days = models.PositiveIntegerField(verbose_name = 'Days requested')
-    incompatible = models.ManyToManyField('Dog')
+    incompatible = models.ManyToManyField('Dog', null=True, blank=True)
 
     def __unicode__(self):
         return self.name
