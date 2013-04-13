@@ -173,7 +173,12 @@ DATABASES['default'] = dj_database_url.config(
                                 db['name'])
                         )
 
-if 'test' in sys.argv:
-    DATABASES['default'] = {'ENGINE': 'django.db.backends.sqlite3'}
+#if 'test' in sys.argv:
+#    DATABASES['default'] = {'ENGINE': 'django.db.backends.sqlite3'}
 
+SOUTH_TESTS_MIGRATE = False
 TEST_RUNNER = 'ignoretests.DjangoIgnoreTestSuiteRunner'
+
+IGNORE_TESTS = (
+    'django_extensions',
+)
