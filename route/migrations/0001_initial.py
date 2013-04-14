@@ -11,10 +11,24 @@ class Migration(SchemaMigration):
         # Adding model 'Problem'
         db.create_table(u'route_problem', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('start', self.gf('django.db.models.fields.related.ForeignKey')(related_name='starting_at', to=orm['route.Node'])),
-            ('end', self.gf('django.db.models.fields.related.ForeignKey')(related_name='ending_at', to=orm['route.Node'])),
         ))
         db.send_create_signal(u'route', ['Problem'])
+
+        # Adding M2M table for field start on 'Problem'
+        db.create_table(u'route_problem_start', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('problem', models.ForeignKey(orm[u'route.problem'], null=False)),
+            ('node', models.ForeignKey(orm[u'route.node'], null=False))
+        ))
+        db.create_unique(u'route_problem_start', ['problem_id', 'node_id'])
+
+        # Adding M2M table for field end on 'Problem'
+        db.create_table(u'route_problem_end', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('problem', models.ForeignKey(orm[u'route.problem'], null=False)),
+            ('node', models.ForeignKey(orm[u'route.node'], null=False))
+        ))
+        db.create_unique(u'route_problem_end', ['problem_id', 'node_id'])
 
         # Adding M2M table for field visits on 'Problem'
         db.create_table(u'route_problem_visits', (
@@ -52,6 +66,12 @@ class Migration(SchemaMigration):
         # Deleting model 'Problem'
         db.delete_table(u'route_problem')
 
+        # Removing M2M table for field start on 'Problem'
+        db.delete_table('route_problem_start')
+
+        # Removing M2M table for field end on 'Problem'
+        db.delete_table('route_problem_end')
+
         # Removing M2M table for field visits on 'Problem'
         db.delete_table('route_problem_visits')
 
@@ -80,9 +100,9 @@ class Migration(SchemaMigration):
         },
         u'route.problem': {
             'Meta': {'object_name': 'Problem'},
-            'end': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'ending_at'", 'to': u"orm['route.Node']"}),
+            'end': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'ending_at'", 'symmetrical': 'False', 'to': u"orm['route.Node']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'start': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'starting_at'", 'to': u"orm['route.Node']"}),
+            'start': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'starting_at'", 'symmetrical': 'False', 'to': u"orm['route.Node']"}),
             'visits': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['route.Node']", 'symmetrical': 'False'})
         }
     }

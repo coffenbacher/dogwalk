@@ -1,0 +1,104 @@
+[
+    {
+        "pk": 1, 
+        "model": "route.node", 
+        "fields": {
+            "address": "1"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "route.node", 
+        "fields": {
+            "address": "2"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "route.node", 
+        "fields": {
+            "address": "3"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "route.node", 
+        "fields": {
+            "address": "4"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "route.edge", 
+        "fields": {
+            "nodes": [
+                1, 
+                2
+            ], 
+            "miles": 1.0, 
+            "minutes": 1.0
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "route.edge", 
+        "fields": {
+            "nodes": [
+                2, 
+                3
+            ], 
+            "miles": 1.0, 
+            "minutes": 1.0
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "route.edge", 
+        "fields": {
+            "nodes": [
+                1, 
+                3
+            ], 
+            "miles": 2.0, 
+            "minutes": 2.0
+        }
+    },
+    {
+        "pk": 4, 
+        "model": "route.edge", 
+        "fields": {
+            "nodes": [
+                1, 
+                4
+            ], 
+            "miles": 12.0, 
+            "minutes": 12.0
+        }
+    },    
+    {
+        "pk": 5, 
+        "model": "route.edge", 
+        "fields": {
+            "nodes": [
+                2, 
+                4
+            ], 
+            "miles": 11.0, 
+            "minutes": 11.0
+        }
+    },    
+    {
+        "pk": 6, 
+        "model": "route.edge", 
+        "fields": {
+            "nodes": [
+                3, 
+                4
+            ], 
+            "miles": 10.0, 
+            "minutes": 10.0
+        }
+    }  
+]
+
+
