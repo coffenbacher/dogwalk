@@ -126,7 +126,8 @@ INSTALLED_APPS = (
     'fixture_magic',
     'south',
     'dog',
-    'route'
+    'route',
+    'schedule'
 )
 
 # A sample logging configuration. The only tangible logging

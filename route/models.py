@@ -1,3 +1,5 @@
+import urllib2
+import json
 from django.db import models
 
 # Create your models here.
@@ -10,39 +12,63 @@ class Problem(models.Model):
     def solve(self):
         v = list(self.visits.all())
         
-        solution = {}
+        s = Solution()
+        s.save()
+        
         for traveler in self.start.all():
-            solution[traveler] = [traveler]
+            s.entries.create(traveler = traveler, node = traveler)
 
         while v:
             for traveler in self.start.all():
+                current = s.entries.filter(traveler=traveler).order_by('-pk')[0]
                 closest_d = 99999
             
                 for i in v:
-                    d = solution[traveler][-1].get_distance(i)
+                    d = current.node.get_distance(i)
                     if d < closest_d:
                         closest = i
                         closest_d = d
-            
-                next_node = closest
-                v.remove(next_node)
-                solution[traveler].append(next_node)
+
+                v.remove(closest)
+                s.entries.create(traveler = traveler, node = closest)
 
         for traveler in self.start.all():
-            solution[traveler].append(self.end.all()[0]) # only works for one end node
+            s.entries.create(traveler = traveler, node = self.end.all()[0])
 
-        return solution
+        return s
 
 class Node(models.Model):
     address = models.TextField()
     
+    def create_edges(self):
+        for n in Node.objects.all():
+            if n != self and not Edge.objects.filter(nodes=self).filter(nodes=n):
+                origin = urllib2.quote(self.address)
+                destination = urllib2.quote(n.address)
+                url = "http://maps.googleapis.com/maps/api/directions/json?origin=%s&destination=%s&sensor=false" % (origin, destination)
+                req = urllib2.urlopen(url)
+                route = json.loads(req.read())
+                seconds = route['routes'][0]['legs'][0]['duration']['value']
+                kms = route['routes'][0]['legs'][0]['distance']['value']
+                
+                e = Edge.objects.create(kms = kms, seconds = seconds)
+                e.nodes = [n, self]
+
     def get_distance(self, n):
-        return Edge.objects.filter(nodes__in=(self, n))[0].minutes
+        return Edge.objects.filter(nodes=self).filter(nodes=n)[0].seconds
     
     def __unicode__(self):
         return self.address
 
 class Edge(models.Model):
     nodes = models.ManyToManyField(Node)
-    miles = models.FloatField()
-    minutes = models.FloatField()
+    kms = models.FloatField()
+    seconds = models.FloatField()
+
+class Solution(models.Model):
+    pass
+
+class SolutionEntry(models.Model):
+    traveler = models.ForeignKey(Node, related_name='travelers')
+    node = models.ForeignKey(Node, related_name='nodes')
+    solution = models.ForeignKey(Solution, related_name='entries')

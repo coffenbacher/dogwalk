@@ -17,13 +17,14 @@ class Dog(TimeStampedModel):
     address = models.TextField()
     days = models.PositiveIntegerField(verbose_name = 'Days requested')
     incompatible = models.ManyToManyField('Dog', null=True, blank=True)
-    node = models.ForeignKey(Node)
+    node = models.ForeignKey(Node, blank=True, related_name='dogs')
 
     def save(self, *args, **kwargs):
         if self.address:
-            self.node = Node(address=self.address)
-            self.node.save()
-        return super(Dog, self).save(*args, **kwargs)
+            n = Node(address=self.address)
+            n.save() 
+            self.node_id = n.id
+        return super(Dog, self).save()
 
     def __unicode__(self):
         return self.name
@@ -40,7 +41,14 @@ class RequiredWalk(TimeStampedModel):
 class Walker(TimeStampedModel):
     name = models.CharField(max_length=200)
     address = models.TextField()
-    node = models.ForeignKey(Node)
+    node = models.ForeignKey(Node, related_name='walkers')
+
+    def save(self, *args, **kwargs):
+        if self.address:
+            n = Node(address=self.address)
+            n.save() 
+            self.node_id = n.id
+        return super(Dog, self).save()
 
     def __unicode__(self):
         return self.name
@@ -48,6 +56,13 @@ class Walker(TimeStampedModel):
 class WalkingLocation(TimeStampedModel):
     address = models.TextField()
     node = models.ForeignKey(Node)
+    
+    def save(self, *args, **kwargs):
+        if self.address:
+            n = Node(address=self.address)
+            n.save() 
+            self.node_id = n.id
+        return super(Dog, self).save()
     
     def __unicode__(self):
         return self.address

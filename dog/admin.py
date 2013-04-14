@@ -4,10 +4,10 @@ from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
 
 class WalkerAdmin(admin.ModelAdmin):
-    hidden = ['node']
+    exclude = ['node']
 
 class DogAdmin(admin.ModelAdmin):
-    hidden = ['node']
+    exclude = ['node']
 
 class RequiredWalkAdmin(admin.ModelAdmin):
     formfield_overrides = {
