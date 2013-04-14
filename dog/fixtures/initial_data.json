@@ -1,32 +1,55 @@
 [
-{
-    "pk": 1, 
-    "model": "dog.walker", 
-    "fields": {
-        "address": "16 Carrol road\r\nNeedham MA\r\n02492", 
-        "modified": "2013-04-13T23:34:32.896Z", 
-        "name": "Tara Bowden", 
-        "created": "2013-04-13T23:34:32.895Z"
+    {
+        "pk": 3, 
+        "model": "route.node", 
+        "fields": {
+            "address": ""
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "route.node", 
+        "fields": {
+            "address": ""
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "route.node", 
+        "fields": {
+            "address": ""
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "dog.walker", 
+        "fields": {
+            "node": "1", 
+            "created": "2013-04-13T23:34:32.895Z", 
+            "modified": "2013-04-13T23:34:32.896Z", 
+            "name": "Tara Bowden", 
+            "address": "16 Carrol road\r\nNeedham MA\r\n02492"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "dog.walker", 
+        "fields": {
+            "node": "2", 
+            "created": "2013-04-13T23:34:47.656Z", 
+            "modified": "2013-04-13T23:34:47.656Z", 
+            "name": "Sam Baron", 
+            "address": "West Roxbury Massachusetts"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "dog.walkinglocation", 
+        "fields": {
+            "node": "3", 
+            "created": "2013-04-13T23:34:47.656Z", 
+            "modified": "2013-04-13T23:34:47.656Z", 
+            "address": "82 Farm Street in Dover MA"
+        }
     }
-},
-{
-    "pk": 2, 
-    "model": "dog.walker", 
-    "fields": {
-        "address": "West Roxbury Massachusetts", 
-        "modified": "2013-04-13T23:34:47.656Z", 
-        "name": "Sam Baron", 
-        "created": "2013-04-13T23:34:47.656Z"
-    }
-},
-{
-    "pk": 1, 
-    "model": "dog.walkinglocation", 
-    "fields": {
-        "address": "82 Farm Street in Dover MA", 
-        "modified": "2013-04-13T23:34:47.656Z", 
-        "created": "2013-04-13T23:34:47.656Z"
-    }
-}
 ]
-

@@ -1,6 +1,7 @@
 from django_extensions.db.models import TimeStampedModel
 from django.db import models
 from bitfield import BitField
+from route.models import Node
 
 DAYS = (
         'Monday',
@@ -16,6 +17,13 @@ class Dog(TimeStampedModel):
     address = models.TextField()
     days = models.PositiveIntegerField(verbose_name = 'Days requested')
     incompatible = models.ManyToManyField('Dog', null=True, blank=True)
+    node = models.ForeignKey(Node)
+
+    def save(self, *args, **kwargs):
+        if self.address:
+            self.node = Node(address=self.address)
+            self.node.save()
+        return super(Dog, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
@@ -32,12 +40,14 @@ class RequiredWalk(TimeStampedModel):
 class Walker(TimeStampedModel):
     name = models.CharField(max_length=200)
     address = models.TextField()
+    node = models.ForeignKey(Node)
 
     def __unicode__(self):
         return self.name
 
 class WalkingLocation(TimeStampedModel):
     address = models.TextField()
+    node = models.ForeignKey(Node)
     
     def __unicode__(self):
         return self.address
