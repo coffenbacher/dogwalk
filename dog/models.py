@@ -20,7 +20,7 @@ class Dog(TimeStampedModel):
     node = models.ForeignKey(Node, blank=True, related_name='dogs')
 
     def save(self, *args, **kwargs):
-        if self.address:
+        if self.address and not self.node:
             n = Node(address=self.address)
             n.save() 
             self.node_id = n.id
@@ -44,7 +44,7 @@ class Walker(TimeStampedModel):
     node = models.ForeignKey(Node, related_name='walkers')
 
     def save(self, *args, **kwargs):
-        if self.address:
+        if self.address and not self.node:
             n = Node(address=self.address)
             n.save() 
             self.node_id = n.id
@@ -58,7 +58,7 @@ class WalkingLocation(TimeStampedModel):
     node = models.ForeignKey(Node)
     
     def save(self, *args, **kwargs):
-        if self.address:
+        if self.address and not self.node:
             n = Node(address=self.address)
             n.save() 
             self.node_id = n.id
