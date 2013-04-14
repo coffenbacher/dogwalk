@@ -1,11 +1,18 @@
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from models import *
+from django import forms
 
+class WeekAdminForm(forms.ModelForm):
+    class Meta:
+        model = Week
+        widgets = {
+            'walkers': FilteredSelectMultiple('Walkers', False, choices=Walker.objects.all()),
+            'dogs': FilteredSelectMultiple('Dogs', False, choices=Dog.objects.all()),
+        }
+        exclude = ['problem', 'solutions', 'schedule']
+    
 class WeekAdmin(admin.ModelAdmin):
-    exclude = ['problem', 'solutions', 'schedule']
-    formfield_overrides = {
-            models.ManyToManyField: {'widget': FilteredSelectMultiple },
-    }
+    form = WeekAdminForm
 
 admin.site.register(Week, WeekAdmin)
