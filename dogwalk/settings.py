@@ -125,7 +125,8 @@ INSTALLED_APPS = (
     'django_extensions',
     'fixture_magic',
     'south',
-    'dog'
+    'dog',
+    'route'
 )
 
 # A sample logging configuration. The only tangible logging
