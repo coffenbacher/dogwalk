@@ -7,7 +7,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
-    # url(r'^$', 'dogwalk.views.home', name='home'),
+    url(r'^$', 'dogwalk.views.home', name='home'),
     # url(r'^dogwalk/', include('dogwalk.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

@@ -1,5 +1,8 @@
 # Django settings for dogwalk project.
+import os
 import sys
+
+PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -109,9 +112,7 @@ ROOT_URLCONF = 'dogwalk.urls'
 WSGI_APPLICATION = 'dogwalk.wsgi.application'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+    os.path.join(PROJECT_PATH, '../templates'),
 )
 
 INSTALLED_APPS = (
@@ -125,6 +126,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'fixture_magic',
     'south',
+    'dogwalk',
     'dog',
     'route',
     'schedule'
