@@ -8,6 +8,7 @@ django-extensions==1.1.1
 -e git://github.com/davedash/django-fixture-magic@34dabb0aab10b9a4aeef623fe35545ceab25c824#egg=django_fixture_magic-dev
 django-ignoretests==0.3.2
 gunicorn==0.17.2
+ipython==0.13.2
 psycopg2==2.5
 six==1.3.0
 wsgiref==0.1.2
