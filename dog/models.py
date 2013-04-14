@@ -20,7 +20,7 @@ class Dog(TimeStampedModel):
     node = models.ForeignKey(Node, blank=True, related_name='dogs')
 
     def save(self, *args, **kwargs):
-        if self.address and not self.node:
+        if self.address and not self.pk:
             n = Node(address=self.address)
             n.save() 
             self.node_id = n.id
