@@ -15,3 +15,4 @@ class ScheduleTest(TestCase):
         w.choose_solution()
                 
 
+        w.schedule.entries_by_walker()

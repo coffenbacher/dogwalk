@@ -3,21 +3,21 @@
         "pk": 3, 
         "model": "route.node", 
         "fields": {
-            "address": ""
+            "address": "82 Farm Street, Dover MA"
         }
     }, 
     {
         "pk": 2, 
         "model": "route.node", 
         "fields": {
-            "address": ""
+            "address": "West Roxbury Massachusetts"
         }
     }, 
     {
         "pk": 1, 
         "model": "route.node", 
         "fields": {
-            "address": ""
+            "address": "16 Carrol road\r\nNeedham MA\r\n02492"
         }
     }, 
     {
@@ -49,7 +49,7 @@
             "node": "3", 
             "created": "2013-04-13T23:34:47.656Z", 
             "modified": "2013-04-13T23:34:47.656Z", 
-            "address": "82 Farm Street in Dover MA"
+            "address": "82 Farm Street, Dover MA"
         }
     }
 ]

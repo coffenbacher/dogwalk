@@ -10,7 +10,7 @@ class Week(TimeStampedModel):
     dogs = models.ManyToManyField(Dog)
     problem = models.ForeignKey(Problem, null=True, blank=True)
     solutions = models.ManyToManyField(Solution, null=True, blank=True)
-    schedule = models.ForeignKey('Schedule', null=True, blank=True)
+    schedule = models.OneToOneField('Schedule', null=True, blank=True)
     
     def solve(self):
         self.problem = Problem()
@@ -25,19 +25,39 @@ class Week(TimeStampedModel):
         
         return s
     
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            super(Week, self).save(*args, **kwargs)
+            self.solve()
+            self.choose_solution()
+
+        super(Week, self).save(*args, **kwargs)
+        
     def choose_solution(self):
         chosen = self.solutions.all()[0] # automatically pick first solution
 
-        self.schedule = Schedule()
-        self.schedule.save()
+        s = Schedule()
+        s.save()
 
         for e in chosen.entries.all():
-           self.schedule.entries.create(walker = e.traveler.walkers.all()[0], node = e.node) 
+           s.entries.create(walker = e.traveler.walkers.all()[0], node = e.node) 
+        
+        s.save()
+        
+        self.schedule = s
+        self.save()
 
 class Schedule(TimeStampedModel):
-    pass
+    def entries_by_walker(self):
+        res = []
+        for w in self.week.walkers.all():
+            res.append([w, self.entries.filter(walker=w)])
+        return res
 
 class ScheduleEntry(TimeStampedModel):
+    class Meta:
+        ordering = ('pk',)
+        
     walker = models.ForeignKey(Walker)
     node = models.ForeignKey(Node)
     schedule = models.ForeignKey(Schedule, related_name='entries')
