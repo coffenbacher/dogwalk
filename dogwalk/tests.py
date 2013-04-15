@@ -74,3 +74,45 @@ class E2ETest(TestCase):
         
         self.assertEquals(w.schedule.entries.count(), 4)
 
+class BastardTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_home(self):
+        walker = Walker.objects.create(name='Elizabeth', address='Boston, MA')
+        wl = WalkingLocation.objects.create(address='Somerville, MA')
+
+        d1 = Dog.objects.create(name='WellesleyDog', address='Wellesley, MA', days = 5)
+        d2 = Dog.objects.create(name='NeedhamDog', address='Needham, MA', days = 1)
+        
+        e = Edge.objects.create(meters=1, seconds=1)
+        e.nodes = [d1.node,d2.node]
+
+        e = Edge.objects.create(meters=1, seconds=5)
+        e.nodes = [d1.node,wl.node]
+
+        e = Edge.objects.create(meters=1, seconds=10)
+        e.nodes = [walker.node,d1.node]
+
+        e = Edge.objects.create(meters=1, seconds=10)
+        e.nodes = [walker.node,d2.node]
+
+        e = Edge.objects.create(meters=1, seconds=10)
+        e.nodes = [walker.node,wl.node]
+        
+        e = Edge.objects.create(meters=1, seconds=3)
+        e.nodes = [wl.node,d2.node]
+
+        w = Week.objects.create()
+        w.dogs = [d1, d2]
+        w.walkers = [walker]
+        
+        w.save()
+        w.solve()
+        w.choose_solution()
+        w.solve()
+        w.choose_solution()
+        w.save()
+        
+        self.assertEquals(w.schedule.entries.count(), 4)
+
