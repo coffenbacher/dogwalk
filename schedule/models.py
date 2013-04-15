@@ -25,14 +25,6 @@ class Week(TimeStampedModel):
         
         return s
     
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            super(Week, self).save(*args, **kwargs)
-            self.solve()
-            self.choose_solution()
-
-        super(Week, self).save(*args, **kwargs)
-        
     def choose_solution(self):
         chosen = self.solutions.all()[0] # automatically pick first solution
 

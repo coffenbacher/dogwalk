@@ -44,11 +44,11 @@ class Walker(TimeStampedModel):
     node = models.ForeignKey(Node, related_name='walkers')
 
     def save(self, *args, **kwargs):
-        if self.address and not self.node:
+        if self.address and not self.pk:
             n = Node(address=self.address)
             n.save() 
             self.node_id = n.id
-        return super(Dog, self).save()
+        return super(Walker, self).save()
 
     def __unicode__(self):
         return self.name
@@ -58,11 +58,11 @@ class WalkingLocation(TimeStampedModel):
     node = models.ForeignKey(Node)
     
     def save(self, *args, **kwargs):
-        if self.address and not self.node:
+        if self.address and not self.pk:
             n = Node(address=self.address)
             n.save() 
             self.node_id = n.id
-        return super(Dog, self).save()
+        return super(WalkingLocation, self).save()
     
     def __unicode__(self):
         return self.address
