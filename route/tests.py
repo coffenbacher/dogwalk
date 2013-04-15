@@ -10,12 +10,9 @@ class EdgeLoadingTest(TestCase):
         Edge.objects.all().delete()
 
     def test_download_edges(self):
-        self.failUnlessEqual(Node.objects.count(), 4)
-        
-        for n in Node.objects.all():
-            n.create_edges()
-        
-        self.failUnlessEqual(Edge.objects.count(), 6)
+        self.failUnlessEqual(Node.objects.count(), 11)
+        Node.create_edges()
+        self.failUnlessEqual(Edge.objects.count(), 11*10/2)
 
 class GreedyRouteFindingTest(TestCase):
     fixtures = ['initial_data.json', 'test.json']
