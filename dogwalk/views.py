@@ -14,7 +14,6 @@ def home(request):
         w.dogs=Dog.objects.all()
         w.walkers=Walker.objects.all()
         
-        Node.create_edges()
         w.solve()
         w.choose_solution()
 

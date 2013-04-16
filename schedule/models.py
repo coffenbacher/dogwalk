@@ -1,3 +1,4 @@
+import datetime
 from django_extensions.db.models import TimeStampedModel
 from dog.models import *
 from route.models import *
@@ -38,8 +39,11 @@ class Week(TimeStampedModel):
         s = Schedule()
         s.save()
 
+        d1 = datetime.datetime.strptime("10:00:00", "%H:%M:%S")
         for e in chosen.entries.all():
-           s.entries.create(walker = e.traveler.walkers.all()[0], node = e.node, day=1, start="10:00:00", end="11:00:00") 
+           s.entries.create(walker = e.traveler.walkers.all()[0], node = e.node, day=1, 
+                                start=d1 + datetime.timedelta(seconds=e.start_seconds), 
+                                end=d1 + datetime.timedelta(seconds=e.end_seconds)) 
         
         s.save()
         
@@ -51,6 +55,7 @@ class Schedule(TimeStampedModel):
         res = []
         for w in self.week.walkers.all():
             res.append([w, self.entries.filter(walker=w)])
+        
         return res
 
 class ScheduleEntry(TimeStampedModel):

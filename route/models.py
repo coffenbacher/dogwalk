@@ -1,4 +1,5 @@
 import time
+import datetime
 import pprint
 import pdb
 import urllib2
@@ -11,12 +12,14 @@ class Problem(models.Model):
     end = models.ManyToManyField('Node', related_name='ending_at')
     visits = models.ManyToManyField('Node')
     
-    #GREEDY ALGORITHM
+    #GREEDY ALGORITHM WITH TIME WEIGHTING
     def solve(self):
         v = list(self.visits.all())
         
         s = Solution()
         s.save()
+        
+        start_time = datetime.datetime.strptime('10:00:00', '%H:%M:%S')
         
         # ADD START POINT
         for traveler in self.start.all():
@@ -25,9 +28,11 @@ class Problem(models.Model):
         while v:
             # Take turns with the greedy algorithm choosing nodes
             for traveler in self.start.all():
-                closest = traveler.traveler_get_closest_greedy(s, v)
-                
                 p = s.get_last_entry(traveler = traveler)
+                
+                t = (start_time + datetime.timedelta(seconds=p.end_seconds)).time()
+                closest = traveler.traveler_get_best_greedy(s, v, t)
+                
                 edge = Edge.objects.filter(nodes=p.node).get(nodes=closest)
                 s.entries.create(traveler = traveler, node = closest, start_seconds=p.end_seconds + edge.seconds)
 
@@ -46,9 +51,37 @@ class Node(models.Model):
     address = models.TextField()
     seconds = models.FloatField(default=420)
     
+    def traveler_get_best_greedy(self, solution, nodes, t):
+        p = solution.get_last_entry(traveler = self)
+        n = p.node.get_best_greedy(nodes, t)
+        if not n:
+            raise Exception("Node finder failing to find an accessible node")
+        return n    
+
+
     def traveler_get_closest_greedy(self, solution, nodes):
         p = solution.get_last_entry(traveler = self)
         return p.node.get_closest_greedy(nodes) 
+
+    def get_best_greedy(self, nodes, t):
+        for i in nodes:
+            d = self.get_distance(i)
+            #print self.address, i.address, d
+            i.score = d
+        
+        for i in nodes:
+            ts = i.get_desirable_times()
+            for desirable in ts:
+                #print desirable[0], t, desirable[1]
+                if t > desirable[0] and t < desirable[1]:
+                    i.score -= 10000 # configure eventually
+        
+        #DEBUG
+        #for i in nodes:
+        #    print i.score
+
+        #Lower score is better!
+        return sorted(nodes, key=lambda n: n.score)[0]
 
     def get_closest_greedy(self, nodes):
         closest_d = 999999999 # impossibly high
@@ -60,6 +93,13 @@ class Node(models.Model):
                 closest_d = d
         
         return closest
+
+    def get_desirable_times(self):
+        if hasattr(self, 'dog'):
+            return [(rw.after, rw.before) for rw in self.dog.requiredwalks.all()]
+        
+        return False    
+
 
     @classmethod
     def create_edges(cls):
@@ -110,13 +150,8 @@ class Node(models.Model):
             nodes = nodes[P-1:]     
 
     def get_distance(self, n):
-        e = Edge.objects.filter(nodes=self).filter(nodes=n)
-        if not e:
-            self.create_edges()
-            e = Edge.objects.filter(nodes=self).filter(nodes=n)
-        if not e[0].seconds:
-            return 9999999999
-        return e[0].seconds
+        e = Edge.objects.filter(nodes=self).get(nodes=n)
+        return e.seconds
 
     
     def __unicode__(self):

@@ -17,7 +17,7 @@ class Dog(TimeStampedModel):
     address = models.TextField()
     days = models.PositiveIntegerField(verbose_name = 'Days requested')
     incompatible = models.ManyToManyField('Dog', null=True, blank=True)
-    node = models.ForeignKey(Node, blank=True, related_name='dogs')
+    node = models.OneToOneField(Node, blank=True, related_name='dog')
 
     def save(self, *args, **kwargs):
         if self.address and not self.pk:
@@ -30,7 +30,7 @@ class Dog(TimeStampedModel):
         return self.name
         
 class RequiredWalk(TimeStampedModel):
-    dog = models.ForeignKey(Dog)
+    dog = models.ForeignKey(Dog, related_name='requiredwalks')
     after = models.TimeField(verbose_name="Pick up after", null=True, blank=True)
     before = models.TimeField(verbose_name="Drop off before", null=True, blank=True)
     days = BitField(flags = DAYS)

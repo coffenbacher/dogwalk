@@ -3,7 +3,7 @@ from dog.models import *
 from models import *
 
 class ScheduleTest(TestCase):
-    fixtures = ['initial_data.json', 'test.json']
+    fixtures = ['walker.json', 'walkinglocations.json', 'dog.json', 'test.json']
     
     def test_basic_schedule(self):
         w = Week()
