@@ -12,6 +12,10 @@
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
+      td {
+          padding: 5px;
+      }
+
     </style>
   </head>
 
@@ -45,9 +49,16 @@
             {% for l in w.schedule.entries_by_walker %}
             <h2>{{ l.0 }}</h2>
             <table>
+                <tr>
+                    <th>Address</th>
+                    <th>Arrive</th>
+                    <th>Depart</th>
+                </tr>
                 {% for e in l.1 %}
                 <tr>
                     <td>{{ e.node.address }}</td>
+                    <td>{{ e.start }}</td>
+                    <td>{{ e.end }}</td>
                 </tr>
                 {% endfor %}
             </table>
