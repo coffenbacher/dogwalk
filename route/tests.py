@@ -15,7 +15,7 @@ class EdgeLoadingTest(TestCase):
         self.failUnlessEqual(Edge.objects.count(), 11*10/2)
 
 class GreedyRouteFindingTest(TestCase):
-    fixtures = ['initial_data.json', 'test.json']
+    fixtures = ['test.json']
 
     def setUp(self):
         pass
@@ -31,9 +31,9 @@ class GreedyRouteFindingTest(TestCase):
         o = Solution()
         o.save()
         t = p.start.all()[0]
-        o.entries.create(traveler=t,node = Node.objects.get(pk=1))
-        o.entries.create(traveler=t,node = Node.objects.get(pk=2)) 
-        o.entries.create(traveler=t,node = Node.objects.get(pk=3)) 
+        o.entries.create(traveler=t,node = Node.objects.get(pk=1), start_seconds=0)
+        o.entries.create(traveler=t,node = Node.objects.get(pk=2), start_seconds=0) 
+        o.entries.create(traveler=t,node = Node.objects.get(pk=3), start_seconds=0) 
         
         for i in range(o.entries.count()):
             self.failUnlessEqual(s.entries.all()[i].traveler, o.entries.all()[i].traveler)
@@ -50,10 +50,10 @@ class GreedyRouteFindingTest(TestCase):
         o = Solution()
         o.save()
         t = p.start.all()[0]
-        o.entries.create(traveler=t,node = Node.objects.get(pk=1))
-        o.entries.create(traveler=t,node = Node.objects.get(pk=2)) 
-        o.entries.create(traveler=t,node = Node.objects.get(pk=3)) 
-        o.entries.create(traveler=t,node = Node.objects.get(pk=4)) 
+        o.entries.create(traveler=t,node = Node.objects.get(pk=1), start_seconds=0)
+        o.entries.create(traveler=t,node = Node.objects.get(pk=2), start_seconds=0) 
+        o.entries.create(traveler=t,node = Node.objects.get(pk=3), start_seconds=0) 
+        o.entries.create(traveler=t,node = Node.objects.get(pk=4), start_seconds=0) 
         
         for i in range(o.entries.count()):
             self.failUnlessEqual(s.entries.all()[i].traveler, o.entries.all()[i].traveler)
@@ -71,13 +71,14 @@ class GreedyRouteFindingTest(TestCase):
         o.save()
         t = p.start.all()[0]
         t1 = p.start.all()[1]
-        o.entries.create(traveler=t,node = Node.objects.get(pk=1))
-        o.entries.create(traveler=t1,node = Node.objects.get(pk=4))
-        o.entries.create(traveler=t,node = Node.objects.get(pk=2)) 
-        o.entries.create(traveler=t1,node = Node.objects.get(pk=3)) 
-        o.entries.create(traveler=t,node = Node.objects.get(pk=4)) 
-        o.entries.create(traveler=t1,node = Node.objects.get(pk=4)) 
+        o.entries.create(traveler=t,node = Node.objects.get(pk=1), start_seconds=0)
+        o.entries.create(traveler=t1,node = Node.objects.get(pk=4), start_seconds=0)
+        o.entries.create(traveler=t,node = Node.objects.get(pk=2), start_seconds=421) 
+        o.entries.create(traveler=t1,node = Node.objects.get(pk=3), start_seconds=430) 
+        o.entries.create(traveler=t,node = Node.objects.get(pk=4), start_seconds=852) 
+        o.entries.create(traveler=t1,node = Node.objects.get(pk=4), start_seconds=860) 
         
         for i in range(o.entries.count()):
             self.failUnlessEqual(s.entries.all()[i].traveler, o.entries.all()[i].traveler)
             self.failUnlessEqual(s.entries.all()[i].node, o.entries.all()[i].node)
+            self.failUnlessEqual(s.entries.all()[i].start_seconds, o.entries.all()[i].start_seconds)

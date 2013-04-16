@@ -4,6 +4,13 @@ from route.models import *
 from django.db import models
 
 # Create your models here.
+DAYS = (
+        (1, 'Monday'),
+        (2, 'Tuesday'),
+        (3, 'Wednesday'),
+        (4, 'Thursday'),
+        (5, 'Friday'),
+        )
 
 class Week(TimeStampedModel):
     walkers = models.ManyToManyField(Walker)
@@ -32,7 +39,7 @@ class Week(TimeStampedModel):
         s.save()
 
         for e in chosen.entries.all():
-           s.entries.create(walker = e.traveler.walkers.all()[0], node = e.node) 
+           s.entries.create(walker = e.traveler.walkers.all()[0], node = e.node, day=1, start="10:00:00", end="11:00:00") 
         
         s.save()
         
@@ -50,6 +57,9 @@ class ScheduleEntry(TimeStampedModel):
     class Meta:
         ordering = ('pk',)
         
+    day = models.PositiveIntegerField(choices = DAYS)
+    start = models.TimeField(verbose_name="Start")
+    end = models.TimeField(verbose_name="End")
     walker = models.ForeignKey(Walker)
     node = models.ForeignKey(Node)
     schedule = models.ForeignKey(Schedule, related_name='entries')

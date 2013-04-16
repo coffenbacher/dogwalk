@@ -18,35 +18,49 @@ class Problem(models.Model):
         s = Solution()
         s.save()
         
+        # ADD START POINT
         for traveler in self.start.all():
-            s.entries.create(traveler = traveler, node = traveler)
+            s.entries.create(traveler = traveler, node = traveler, start_seconds=0)
 
         while v:
+            # Take turns with the greedy algorithm choosing nodes
             for traveler in self.start.all():
-                current = s.entries.filter(traveler=traveler).order_by('-pk')[0]
-                closest_d = 999999999
-            
-                for i in v:
-                    d = current.node.get_distance(i)
-                    if d < closest_d:
-                        closest = i
-                        closest_d = d
+                closest = traveler.traveler_get_closest_greedy(s, v)
+                
+                p = s.get_last_entry(traveler = traveler)
+                edge = Edge.objects.filter(nodes=p.node).get(nodes=closest)
+                s.entries.create(traveler = traveler, node = closest, start_seconds=p.end_seconds + edge.seconds)
 
-                try:
-                    v.remove(closest)
-                    s.entries.create(traveler = traveler, node = closest)
-                except:
-                    print "ERROR"
-                    pass
+                v.remove(closest)
 
+        # ADD END POINT
         for traveler in self.start.all():
-            s.entries.create(traveler = traveler, node = self.end.all()[0])
+            p = s.entries.filter(traveler = traveler).order_by('-pk')[0]
+            e = self.end.all()[0]
+            edge = Edge.objects.filter(nodes=p.node).get(nodes=e)
+            s.entries.create(traveler = traveler, node = e, start_seconds=p.end_seconds + edge.seconds)
 
         return s
 
 class Node(models.Model):
     address = models.TextField()
+    seconds = models.FloatField(default=420)
     
+    def traveler_get_closest_greedy(self, solution, nodes):
+        p = solution.get_last_entry(traveler = self)
+        return p.node.get_closest_greedy(nodes) 
+
+    def get_closest_greedy(self, nodes):
+        closest_d = 999999999 # impossibly high
+
+        for i in nodes:
+            d = self.get_distance(i)
+            if d < closest_d:
+                closest = i
+                closest_d = d
+        
+        return closest
+
     @classmethod
     def create_edges(cls):
         nodes = list(Node.objects.all())
@@ -70,12 +84,11 @@ class Node(models.Model):
                 while incomplete and retry < 3:
                     req = urllib2.urlopen(url)
                     res = json.loads(req.read())
-                    pprint.pprint(res)
                     rows = res['rows']
-                    pprint.pprint(rows)
                     if res['status'] == 'OK':
                         incomplete = False
                     else:
+                        pprint.pprint(res)
                         retry +=1 
                         time.sleep(5)
 
@@ -92,7 +105,7 @@ class Node(models.Model):
                             e.nodes = [o, d]
                             e.save()
                             
-                time.sleep(2)
+                time.sleep(3)
            
             nodes = nodes[P-1:]     
 
@@ -115,9 +128,17 @@ class Edge(models.Model):
     seconds = models.FloatField(null=True, blank=True)
 
 class Solution(models.Model):
-    pass
+    def get_last_entry(self, traveler):
+        return self.entries.filter(traveler = traveler).order_by('-pk')[0]
 
 class SolutionEntry(models.Model):
     traveler = models.ForeignKey(Node, related_name='travelers')
     node = models.ForeignKey(Node, related_name='nodes')
     solution = models.ForeignKey(Solution, related_name='entries')
+    start_seconds = models.FloatField()
+    end_seconds = models.FloatField()
+    
+    def save(self, *args, **kwargs):
+        self.end_seconds = self.start_seconds + self.node.seconds
+
+        return super(SolutionEntry, self).save(*args, **kwargs)
