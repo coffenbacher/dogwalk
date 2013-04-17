@@ -129,7 +129,8 @@ INSTALLED_APPS = (
     'south',
     'dogwalk',
     'dog',
-    'route',
+    'graph',
+    'solver',
     'schedule'
 )
 

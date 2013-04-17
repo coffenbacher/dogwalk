@@ -1,7 +1,7 @@
 from django_extensions.db.models import TimeStampedModel
 from django.db import models
 from bitfield import BitField
-from route.models import Node
+from graph.models import Node
 
 DAYS = (
         'Monday',
@@ -42,6 +42,7 @@ class Walker(TimeStampedModel):
     name = models.CharField(max_length=200)
     address = models.TextField()
     node = models.ForeignKey(Node, related_name='walkers')
+    capacity = models.PositiveIntegerField(default=9)
 
     def save(self, *args, **kwargs):
         if self.address and not self.pk:

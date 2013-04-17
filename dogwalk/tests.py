@@ -1,7 +1,8 @@
 import pdb
 from dog.models import *
 from schedule.models import *
-from route.models import *
+from graph.models import *
+from solver.models import *
 
 from django.conf import settings
 from django.test import TestCase

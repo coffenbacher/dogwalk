@@ -1,5 +1,5 @@
 from dog.models import *
-from route.models import *
+from graph.models import *
 from schedule.models import *
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required

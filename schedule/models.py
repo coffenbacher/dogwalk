@@ -1,7 +1,8 @@
 import datetime
 from django_extensions.db.models import TimeStampedModel
 from dog.models import *
-from route.models import *
+from graph.models import *
+from solver.models import *
 from django.db import models
 
 # Create your models here.
