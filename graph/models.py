@@ -61,6 +61,8 @@ class Node(models.Model):
             nodes = nodes[P-1:]     
 
     def get_distance(self, n):
+        if self == n:
+            return 0
         e = Edge.objects.filter(nodes=self).get(nodes=n)
         return e.seconds
     

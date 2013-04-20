@@ -2,9 +2,10 @@
 {
     "pk": 3, 
     "fields": {
-        "address": "82 Farm Street, Dover MA"
+        "address": "82 Farm Street, Dover MA",
+        "seconds": 2000
     }, 
-    "model": "route.node"
+    "model": "graph.node"
 },
 {
     "pk": 1, 

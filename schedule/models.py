@@ -25,9 +25,10 @@ class Week(TimeStampedModel):
         self.problem = Problem()
         self.problem.save()
         
-        self.problem.start = [w.node for w in self.walkers.all()]
-        self.problem.end = [WalkingLocation.objects.all()[0].node] #only works for one end
-        self.problem.visits = [d.node for d in self.dogs.all()]
+        self.problem.walkers = self.walkers.all()
+        self.problem.dogs = self.dogs.all()
+        self.problem.walkinglocations = WalkingLocation.objects.all()
+        self.problem.save()
 
         s = self.problem.solve()
         self.solutions.add(s)
@@ -42,9 +43,9 @@ class Week(TimeStampedModel):
 
         d1 = datetime.datetime.strptime("10:00:00", "%H:%M:%S")
         for e in chosen.entries.all():
-           s.entries.create(walker = e.traveler.walkers.all()[0], node = e.node, day=1, 
-                                start=d1 + datetime.timedelta(seconds=e.start_seconds), 
-                                end=d1 + datetime.timedelta(seconds=e.end_seconds)) 
+           s.entries.create(walker = e.pwalker.walker, node = e.node,  
+                                start = e.start,
+                                end = e.end) 
         
         s.save()
         
@@ -63,9 +64,8 @@ class ScheduleEntry(TimeStampedModel):
     class Meta:
         ordering = ('pk',)
         
-    day = models.PositiveIntegerField(choices = DAYS)
-    start = models.TimeField(verbose_name="Start")
-    end = models.TimeField(verbose_name="End")
+    start = models.DateTimeField(verbose_name="Start")
+    end = models.DateTimeField(verbose_name="End")
     walker = models.ForeignKey(Walker)
     node = models.ForeignKey(Node)
     schedule = models.ForeignKey(Schedule, related_name='entries')
