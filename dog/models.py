@@ -43,6 +43,8 @@ class Walker(TimeStampedModel):
     address = models.TextField()
     node = models.ForeignKey(Node, related_name='walkers')
     capacity = models.PositiveIntegerField(default=9)
+    start_time = models.TimeField(default='10:00:00')
+    end_time = models.TimeField(default='15:00:00')
 
     def save(self, *args, **kwargs):
         if self.address and not self.pk:

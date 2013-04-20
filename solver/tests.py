@@ -44,6 +44,24 @@ class SolutionTest(TestCase):
         self.solution.pending = PDog.objects.all()
         self.assertFalse(self.solution.solved())
 
+class Solution_MultiDay_Test(TestCase):
+    fixtures = ['walker_test.json', 'dog_test.json', 'walkinglocation_test.json', 'edge_test.json']
+    def setUp(self):
+        p = Problem.objects.create()
+        p.walkers = Walker.objects.all()
+        p.dogs = Dog.objects.all()
+        p.dogs.update(days = 2)
+        p.walkinglocations = WalkingLocation.objects.all()
+        p.save()
+        self.solution = p.solution_set.all()[0]
+        self.problem = p
+
+    def test_solve(self):
+        sol = self.problem.solve()
+        self.assertTrue(sol.entries.count() > 30)
+        self.assertTrue(sol.entries.order_by('-end')[0].end.day > 5)
+        print sol.entries
+
 class SolutionEntryTest(TestCase):
     pass
 
