@@ -19,6 +19,7 @@ class Node(models.Model):
         P = 10 
         
         while nodes:
+            print 'Remaining: %s' % len(nodes)
             origins = nodes[:P]
             for i in range(0, len(nodes), P):
                 #print "working nodes %s:%s" % (i, i+P)
