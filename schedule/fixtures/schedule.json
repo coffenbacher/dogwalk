@@ -1,0 +1,11 @@
+[
+{
+    "pk": 1, 
+    "model": "schedule.schedule", 
+    "fields": {
+        "modified": "2013-04-20T21:11:16.910Z", 
+        "created": "2013-04-20T21:11:15.809Z"
+    }
+}
+]
+

@@ -1,0 +1,375 @@
+[
+{
+    "pk": 4, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "21 Kenilworth Road Wellesley MA", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 5, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "28 Fuller Brook Rd Wellesley MA", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 6, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "11 FullerBrook Rd Wellesley MA", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 7, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "48 Scotch Pine Rd Wellesley MA", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 8, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "14 Sawyer Rd Wellesley MA", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 9, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "16 Cleveland Road Wellesley MA", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 10, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "16 Cleveland Road Wellesley MA", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 11, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "22 Kenilworth Road Wellesley MA", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 12, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "30 Colburn Road, Wellesley MA", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 13, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "8 Shaw Road, Wellesley MA", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 14, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "12 Clifton Rd, Wellesley Ma", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 15, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "16 Hickory Rd, Wellesley MA", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 16, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "1 Hollis Street, Wellesley Ma", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 17, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "6 Amherst Road, Wellesley Ma", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 18, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "26 Priscilla Circle", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 9, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-14T23:26:36.822Z", 
+        "days": 5, 
+        "address": "21 Kenilworth Road", 
+        "modified": "2013-04-14T23:26:36.828Z", 
+        "incompatible": [], 
+        "name": "Kodi", 
+        "node": 4
+    }
+},
+{
+    "pk": 10, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-14T23:27:18.884Z", 
+        "days": 4, 
+        "address": "28 Fuller Brook Rd", 
+        "modified": "2013-04-14T23:27:18.887Z", 
+        "incompatible": [], 
+        "name": "Tucker", 
+        "node": 5
+    }
+},
+{
+    "pk": 11, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-14T23:27:42.865Z", 
+        "days": 3, 
+        "address": "11 FullerBrook Rd", 
+        "modified": "2013-04-14T23:27:42.872Z", 
+        "incompatible": [], 
+        "name": "Baily", 
+        "node": 6
+    }
+},
+{
+    "pk": 12, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-14T23:27:57.078Z", 
+        "days": 3, 
+        "address": "48 Scotch Pine Rd", 
+        "modified": "2013-04-14T23:27:57.097Z", 
+        "incompatible": [], 
+        "name": "Josie", 
+        "node": 7
+    }
+},
+{
+    "pk": 13, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-14T23:28:17.358Z", 
+        "days": 2, 
+        "address": "14 Sawyer Rd", 
+        "modified": "2013-04-14T23:28:27.324Z", 
+        "incompatible": [], 
+        "name": "Max", 
+        "node": 8
+    }
+},
+{
+    "pk": 14, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-14T23:29:06.083Z", 
+        "days": 1, 
+        "address": "16 Cleveland Road", 
+        "modified": "2013-04-14T23:29:06.087Z", 
+        "incompatible": [], 
+        "name": "Bruce", 
+        "node": 9
+    }
+},
+{
+    "pk": 15, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-14T23:29:16.311Z", 
+        "days": 1, 
+        "address": "16 Cleveland Road", 
+        "modified": "2013-04-14T23:29:16.324Z", 
+        "incompatible": [], 
+        "name": "Stella", 
+        "node": 10
+    }
+},
+{
+    "pk": 16, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-14T23:29:28.713Z", 
+        "days": 1, 
+        "address": "22 Kenilworth Road", 
+        "modified": "2013-04-14T23:29:28.717Z", 
+        "incompatible": [], 
+        "name": "Henry", 
+        "node": 11
+    }
+},
+{
+    "pk": 17, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-16T17:41:36.949Z", 
+        "days": 5, 
+        "address": "30 Colburn Road, Wellesley MA", 
+        "modified": "2013-04-16T17:41:37.039Z", 
+        "incompatible": [], 
+        "name": "Zu Zu", 
+        "node": 12
+    }
+},
+{
+    "pk": 18, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-16T17:41:59.165Z", 
+        "days": 1, 
+        "address": "8 Shaw Road, Wellesley MA", 
+        "modified": "2013-04-16T17:41:59.176Z", 
+        "incompatible": [], 
+        "name": "Lab Lucy\t", 
+        "node": 13
+    }
+},
+{
+    "pk": 19, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-16T17:42:25.211Z", 
+        "days": 2, 
+        "address": "12 Clifton Rd, Wellesley Ma", 
+        "modified": "2013-04-16T17:42:25.217Z", 
+        "incompatible": [], 
+        "name": "Lucie", 
+        "node": 14
+    }
+},
+{
+    "pk": 20, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-16T17:43:42.546Z", 
+        "days": 2, 
+        "address": "16 Hickory Rd, Wellesley MA", 
+        "modified": "2013-04-16T17:43:42.550Z", 
+        "incompatible": [], 
+        "name": "Czarney", 
+        "node": 15
+    }
+},
+{
+    "pk": 21, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-16T17:44:08.119Z", 
+        "days": 5, 
+        "address": "1 Hollis Street, Wellesley Ma", 
+        "modified": "2013-04-16T17:44:08.124Z", 
+        "incompatible": [], 
+        "name": "Piper", 
+        "node": 16
+    }
+},
+{
+    "pk": 22, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-16T17:44:34.086Z", 
+        "days": 2, 
+        "address": "6 Amherst Road, Wellesley Ma", 
+        "modified": "2013-04-16T17:44:34.091Z", 
+        "incompatible": [], 
+        "name": "Newman", 
+        "node": 17
+    }
+},
+{
+    "pk": 23, 
+    "model": "dog.dog", 
+    "fields": {
+        "created": "2013-04-16T17:44:55.578Z", 
+        "days": 3, 
+        "address": "26 Priscilla Circle", 
+        "modified": "2013-04-16T17:44:55.593Z", 
+        "incompatible": [], 
+        "name": "Walter", 
+        "node": 18
+    }
+},
+{
+    "pk": 1, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "16 Carrol road\r\nNeedham MA\r\n02492", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 2, 
+    "model": "graph.node", 
+    "fields": {
+        "address": "West Roxbury Massachusetts", 
+        "seconds": 420.0
+    }
+},
+{
+    "pk": 1, 
+    "model": "dog.walker", 
+    "fields": {
+        "created": "2013-04-13T23:34:32.895Z", 
+        "node": 1, 
+        "name": "Tara Bowden", 
+        "address": "16 Carrol road\r\nNeedham MA\r\n02492", 
+        "modified": "2013-04-13T23:34:32.896Z"
+    }
+},
+{
+    "pk": 2, 
+    "model": "dog.walker", 
+    "fields": {
+        "created": "2013-04-13T23:34:47.656Z", 
+        "node": 2, 
+        "name": "Sam Baron", 
+        "address": "West Roxbury Massachusetts", 
+        "modified": "2013-04-13T23:34:47.656Z"
+    }
+},
+{
+    "fields": {
+        "seconds": 420.0, 
+        "address": "82 Farm Street, Dover MA"
+    }, 
+    "model": "graph.node", 
+    "pk": 3
+},
+{
+    "fields": {
+        "modified": "2013-04-13T23:34:47.656Z", 
+        "address": "82 Farm Street, Dover MA", 
+        "node": 3, 
+        "created": "2013-04-13T23:34:47.656Z"
+    }, 
+    "model": "dog.walkinglocation", 
+    "pk": 1
+}
+]
+
+

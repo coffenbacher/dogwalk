@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+ 
+{% block mapactive %}active{% endblock %} 
+{% block head %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+<script type="text/javascript">
+
+function str_to_color(str) {
+    if (str == "Tara Bowden")
+        return 'blue';
+    else
+        return 'red';
+}
+
+$(document).ready(function(){
+    map = new GMaps({
+          div: '#map',
+          lat: 42.2964,
+          lng: -71.2931,
+          zoom: 13
+      });
+
+    $.getJSON('/schedule/1/', function(d){
+        for (var i in d){
+            if (d[i].walker != 'Tara Bowden') {
+                map.drawRoute({
+                    origin: d[i].previous_address,
+                    destination: d[i].address,
+                    travelMode: 'driving',
+                    strokeColor: str_to_color(d[i].walker),
+                    strokeOpacity: 0.5,
+                    strokeWeight: 3,
+                });
+                console.log(str_to_color(d[i].walker)); 
+            }
+        };
+
+    });
+});
+</script>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+<script type="text/javascript" src="https://raw.github.com/coffenbacher/gmaps/master/gmaps.js"></script>
+{% endblock %}
+
+{% block content %}
+    <h1>Weekly Schedule Map</h1>
+    <div>
+        <div id="map" style="width:100%; height: 500px"></div>
+    </div>
+{% endblock %}
