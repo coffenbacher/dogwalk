@@ -6,7 +6,8 @@ from django.core import serializers
 from django.shortcuts import render_to_response
 
 def show(request, pk):
-    entries = Schedule.objects.get(pk=pk).entries.all()
+    #entries = Schedule.objects.get(pk=pk).entries.all()
+    entries = Schedule.objects.all()[0].entries.all()
     days = entries.dates('start', 'day')
     
     res = []
@@ -31,6 +32,7 @@ def show(request, pk):
     return HttpResponse(j)
 
 def map(request, pk):
-    entries = Schedule.objects.get(pk=pk).entries.all()
+    entries = Schedule.objects.all()[0].entries.all()
+    #entries = Schedule.objects.get(pk=pk).entries.all()
     
     return render_to_response('schedule/map.html', {'entries': entries})

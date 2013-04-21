@@ -16,13 +16,12 @@ DAYS = (
         (6, 'Sunday'),
         )
 
-class Plan(TimeStampedModel):
+class Schedule(TimeStampedModel):
     walkers = models.ManyToManyField(Walker)
     dogs = models.ManyToManyField(Dog)
     problem = models.ForeignKey(Problem, null=True, blank=True)
     solutions = models.ManyToManyField(Solution, null=True, blank=True)
     start = models.DateField()
-    schedule = models.OneToOneField('Schedule', null=True, blank=True)
     
     def solve(self):
         self.problem = Problem(start_date = self.start)
@@ -41,24 +40,17 @@ class Plan(TimeStampedModel):
     def choose_solution(self):
         chosen = self.solutions.all()[0] # automatically pick first solution
 
-        s = Schedule()
-        s.save()
-
         d1 = datetime.datetime.strptime("10:00:00", "%H:%M:%S")
         for e in chosen.entries.all():
-           s.entries.create(walker = e.pwalker.walker, node = e.node,  
+           self.entries.create(walker = e.pwalker.walker, node = e.node,  
                                 start = e.start,
                                 end = e.end) 
         
-        s.save()
-        
-        self.schedule = s
         self.save()
 
-class Schedule(TimeStampedModel):
     def entries_by_walker(self):
         res = []
-        for w in self.plan.walkers.all():
+        for w in self.walkers.all():
             res.append([w, self.entries.filter(walker=w)])
         return res
     

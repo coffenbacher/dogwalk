@@ -4,7 +4,7 @@
 {% block content %}
   <h1>Weekly Schedule</h1>
   <p>
-    {% for l in w.schedule.entries_by_day %}
+    {% for l in w.entries_by_day %}
     <h2>{{ l.0|date:"D M d" }}</h2>
     <table>
         <tr>
@@ -27,7 +27,7 @@
     {% endfor %}
   </p>
   <!--<p>
-    {% for l in w.schedule.entries_by_walker %}
+    {% for l in w.entries_by_walker %}
     <h2>{{ l.0 }}</h2>
     <table>
         <tr>

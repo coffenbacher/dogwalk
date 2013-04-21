@@ -21,28 +21,6 @@ class ProblemTest(TestCase):
         self.assertTrue(self.p.solve())
         self.assertTrue(SolutionEntry.objects.count() > 0)
     
-class SolutionTest(TestCase):
-    fixtures = ['walker_test.json', 'dog_test.json', 'walkinglocation_test.json', 'edge_test.json']
-    def setUp(self):
-        p = Problem.objects.create()
-        p.walkers = Walker.objects.all()
-        p.dogs = Dog.objects.all()
-        p.walkinglocations = WalkingLocation.objects.all()
-        p.save()
-        self.solution = p.solution_set.all()[0]
-
-    def test_creation(self):
-        self.assertTrue(self.solution.problem.dogs.all())
-        self.assertTrue(PDog.objects.all())
-        self.assertEquals(PDog.objects.count(), self.solution.pdogs.count())
-        
-    def test_solved(self):
-        self.solution.pending = []
-        self.assertTrue(self.solution.solved())
-    
-    def test_solved_false(self):
-        self.solution.pending = PDog.objects.all()
-        self.assertFalse(self.solution.solved())
 
 class Solution_MultiDay_Test(TestCase):
     fixtures = ['walker_test.json', 'dog_test.json', 'walkinglocation_test.json', 'edge_test.json']
