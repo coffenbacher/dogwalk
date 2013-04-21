@@ -65,7 +65,7 @@ class E2ETest(TestCase):
         e = Edge.objects.create(meters=1, seconds=3)
         e.nodes = [wl.node,d2.node]
 
-        w = Week.objects.create()
+        w = Plan.objects.create()
         w.dogs = [d1, d2]
         w.walkers = [walker]
         
@@ -104,7 +104,7 @@ class BastardTest(TestCase):
         e = Edge.objects.create(meters=1, seconds=3)
         e.nodes = [wl.node,d2.node]
 
-        w = Week.objects.create()
+        w = Plan.objects.create()
         w.dogs = [d1, d2]
         w.walkers = [walker]
         

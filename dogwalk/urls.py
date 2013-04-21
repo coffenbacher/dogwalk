@@ -8,7 +8,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'dogwalk.views.home', name='home'),
-    # url(r'^dogwalk/', include('dogwalk.foo.urls')),
+    url(r'^schedule/', include('schedule.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

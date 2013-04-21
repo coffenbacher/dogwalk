@@ -28,8 +28,11 @@ class Problem(models.Model):
 
     def solve(self):
         s = self.main_solution
+        skip = True
         while not s.solved():
-            s.next_date()        
+            if not skip: #complete first day
+                s.next_date()        
+            skip = False
             while not s.day_complete():
                 for w in s.pwalkers.all():
                     w.turn()
@@ -42,11 +45,8 @@ class Solution(models.Model):
     date = models.DateField() # flexible
     
     def solved(self):
-        print "Unwalked: ", self.unwalked().count()
-        print "Walked: ", self.walked().count()
-        print "Walkers: ", self.pwalkers.all()
 
-        if not self.date > self.problem.start_date + datetime.timedelta(days=13): #do full week
+        if not self.date > self.problem.start_date + datetime.timedelta(days=6): #do full week
             return False
             
         if self.unwalked().count():
@@ -68,6 +68,10 @@ class Solution(models.Model):
         return False # no desirable found
     
     def day_complete(self):
+        print "Unwalked: ", self.unwalked().count()
+        print "Available: ", self.available().count()
+        print "Walked: ", self.walked().count()
+
         if self.date.weekday() >= 5:
             return True
 
@@ -165,7 +169,9 @@ class PWalker(models.Model):
 
     def go_home(self):
         print "%s going home" % self.walker.name
-        if self.carrying.count():
+        if self.carrying.filter(walked=False).count():
+            self.play()
+        elif self.carrying.filter(walked=True).count():
             self.drop_closest()
         else:
             self.node = self.walker.node
@@ -178,8 +184,10 @@ class PWalker(models.Model):
         print "%s drop_or_play" % self.walker.name
         if self.full(walked=False) or self.last_trip():
             self.play()
-        else:
+        elif self.carrying.filter(walked=True):
             self.drop_closest()
+        else:
+            self.end_day()
 
     def drop_or_pick(self):    
         print "%s drop_or_pick" % self.walker.name
@@ -190,7 +198,7 @@ class PWalker(models.Model):
         if best.walked:
             self.drop(best)
         elif best.score(self) > 0:
-            raise Exception("Trying to pick up dog when undesirable")
+            self.end_day()
         else:
             self.pick(best)
         

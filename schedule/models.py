@@ -16,15 +16,16 @@ DAYS = (
         (6, 'Sunday'),
         )
 
-class Week(TimeStampedModel):
+class Plan(TimeStampedModel):
     walkers = models.ManyToManyField(Walker)
     dogs = models.ManyToManyField(Dog)
     problem = models.ForeignKey(Problem, null=True, blank=True)
     solutions = models.ManyToManyField(Solution, null=True, blank=True)
+    start = models.DateField()
     schedule = models.OneToOneField('Schedule', null=True, blank=True)
     
     def solve(self):
-        self.problem = Problem()
+        self.problem = Problem(start_date = self.start)
         self.problem.save()
         
         self.problem.walkers = self.walkers.all()
@@ -57,9 +58,19 @@ class Week(TimeStampedModel):
 class Schedule(TimeStampedModel):
     def entries_by_walker(self):
         res = []
-        for w in self.week.walkers.all():
+        for w in self.plan.walkers.all():
             res.append([w, self.entries.filter(walker=w)])
+        return res
+    
+    def entries_by_day(self):
         
+        entries = self.entries.all()
+        days = entries.dates('start', 'day')
+
+        res = []
+        for d in days:
+            res.append([d, self.entries.filter(start__day = d.day).order_by('walker', 'start')])
+            
         return res
 
 class ScheduleEntry(TimeStampedModel):

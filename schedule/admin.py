@@ -3,16 +3,16 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from models import *
 from django import forms
 
-class WeekAdminForm(forms.ModelForm):
+class PlanAdminForm(forms.ModelForm):
     class Meta:
-        model = Week
+        model = Plan
         widgets = {
             'walkers': FilteredSelectMultiple('Walkers', False, choices=Walker.objects.all()),
             'dogs': FilteredSelectMultiple('Dogs', False, choices=Dog.objects.all()),
         }
         exclude = ['problem', 'solutions', 'schedule']
     
-class WeekAdmin(admin.ModelAdmin):
-    form = WeekAdminForm
+class PlanAdmin(admin.ModelAdmin):
+    form = PlanAdminForm
 
-admin.site.register(Week, WeekAdmin)
+admin.site.register(Plan, PlanAdmin)
