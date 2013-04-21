@@ -3,7 +3,7 @@ from django.test.client import Client
 from dog.models import *
 from models import *
 
-class ScheduleTest(TestCase):
+"""class ScheduleTest(TestCase):
     fixtures = ['walker.json', 'walkinglocations.json', 'dog.json', 'test.json']
     
 class ScheduleViewTest(TestCase):
@@ -21,4 +21,4 @@ class ScheduleViewTest(TestCase):
         response = self.client.get('/schedule/1/map/')
         self.failUnlessEqual(response.status_code, 200)
 
-
+"""
