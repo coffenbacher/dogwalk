@@ -75,7 +75,7 @@ class Solution(models.Model):
         if self.date.weekday() >= 5:
             return True
 
-        if self.unwalked().count() and self.find_desirable():
+        if self.unwalked().count() and self.find_desirable() and not self.walker_overtime():
             return False
 
         for pwalker in self.pwalkers.all():
@@ -84,6 +84,12 @@ class Solution(models.Model):
 
         return True # No carrying, no available
 
+    def walker_overtime(self):
+        for p in self.pwalkers.all():
+            if p.time.time() < p.walker.end_time:
+                return False
+        return True        
+                
     def next_date(self):
         self.date = self.date + datetime.timedelta(days=1)
         
@@ -174,8 +180,12 @@ class PWalker(models.Model):
         elif self.carrying.filter(walked=True).count():
             self.drop_closest()
         else:
-            self.node = self.walker.node
-            self.save()
+            self.drive_home()
+
+    def drive_home(self):
+        print "%s drove home" % self.walker.name
+        self.node = self.walker.node
+        self.save()
 
     def home(self):
         return self.node == self.walker.node
