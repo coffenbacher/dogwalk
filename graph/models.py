@@ -22,7 +22,7 @@ class Node(models.Model):
             print 'Remaining: %s' % len(nodes)
             origins = nodes[:P]
             for i in range(0, len(nodes), P):
-                #print "working nodes %s:%s" % (i, i+P)
+                print "working nodes %s:%s out of %s" % (i, i+P, len(nodes))
                 destinations = nodes[i:i+P]
                 #print "len(destinations) %s" % len(destinations)
                 s_origins = [urllib2.quote(n.address) for n in origins]
@@ -51,7 +51,7 @@ class Node(models.Model):
                     for j in range(len(row['elements'])):
                         e = row['elements'][j]
                         d = destinations[j]
-                        #print o, d, e['distance']['value'], e['duration']['value']
+                        print o, d, e['distance']['value'], e['duration']['value']
                         if not Edge.objects.filter(nodes=o).filter(nodes=d) and d != o:
                             e = Edge.objects.create(meters = e['distance']['value'], seconds = e['duration']['value'])
                             e.nodes = [o, d]
