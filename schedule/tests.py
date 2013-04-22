@@ -3,22 +3,22 @@ from django.test.client import Client
 from dog.models import *
 from models import *
 
-"""class ScheduleTest(TestCase):
-    fixtures = ['walker.json', 'walkinglocations.json', 'dog.json', 'test.json']
+class ScheduleTest(TestCase):
+    fixtures = ['test.json']
     
-class ScheduleViewTest(TestCase):
-    fixtures = ['schedule.json', 'scheduleentry.json']
-
     def setUp(self):
-        self.client = Client()
-
-    def test_view(self):
-        response = self.client.get('/schedule/1/')
-        self.failUnlessEqual(response.status_code, 200)
-        json.loads(response.content)
+        self.s = Schedule(start='2013-01-01', end='2013-04-01')
+        self.s.save()
     
-    def test_map(self):
-        response = self.client.get('/schedule/1/map/')
-        self.failUnlessEqual(response.status_code, 200)
-
-"""
+    def test_compile(self):
+        return True
+    
+    def test_save(self):    
+        self.s.walkers = Walker.objects.all()
+        self.s.dogs = Dog.objects.all()
+        self.s.save()
+        
+        solution = self.s.solutions.all()[0]
+        self.assertTrue(solution.pwalkers.all())
+        self.assertTrue(solution.pdogs.all())
+        

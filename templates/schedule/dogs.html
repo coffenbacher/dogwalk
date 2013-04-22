@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block dogactive %}active{% endblock %}
+
+{% block content %}
+  <h1>Weekly Schedule</h1>
+  <p>
+    {% for l in w.entries_by_dog %}
+    <h2>{{ l.0 }} ( {{ l.0.days }} / week )</h2>
+    <table>
+        <tr>
+            <th>Time</th>
+            <th>Action</th>
+            <th>Walker</th>
+            <!--<th>Requested time?</th>-->
+        </tr>
+        {% for e in l.1 %}
+        <tr>
+            <td>{{ e.start|date:"D M d g:i A" }}</td>
+            <td>{{ e.action }}</td>
+            <td>{{ e.walker }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endfor %}
+  </p>
+  <div>
+  
+  </div>
+  {% endblock %}
+

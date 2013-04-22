@@ -130,7 +130,6 @@ INSTALLED_APPS = (
     'dogwalk',
     'dog',
     'graph',
-    'solver',
     'schedule'
 )
 

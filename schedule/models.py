@@ -2,8 +2,8 @@ import datetime
 from django_extensions.db.models import TimeStampedModel
 from dog.models import *
 from graph.models import *
-from solver.models import *
 from django.db import models
+import pdb
 
 # Create your models here.
 DAYS = (
@@ -19,19 +19,24 @@ DAYS = (
 class Schedule(TimeStampedModel):
     walkers = models.ManyToManyField(Walker)
     dogs = models.ManyToManyField(Dog)
-    problem = models.ForeignKey(Problem, null=True, blank=True)
-    solutions = models.ManyToManyField(Solution, null=True, blank=True)
     start = models.DateField()
     end = models.DateField()
     
     def save(self, *args, **kwargs):
-        super(Problem, self).save(*args, **kwargs)
-
-        s = Solution.objects.get_or_create(problem = self, date = self.start_date)[0]
+        super(Schedule, self).save(*args, **kwargs)
+       
+        self.init()
+    
+    def init(self):    
+        s = Solution.objects.get_or_create(schedule = self, date = self.start)[0]
+        
+        if isinstance(self.start, basestring):
+            self.start = datetime.datetime.strptime(self.start, '%Y-%m-%d')
+        
         for w in self.walkers.all():
-            dt = datetime.datetime(self.start_date.year, 
-                                    self.start_date.month, 
-                                    self.start_date.day, 
+            dt = datetime.datetime(self.start.year, 
+                                    self.start.month, 
+                                    self.start.day, 
                                     w.start_time.hour, 
                                     w.start_time.minute, 
                                     w.start_time.second)
@@ -103,12 +108,12 @@ class Event(models.Model):
     time = models.DateTimeField()
                 
 class Solution(models.Model):
-    problem = models.ForeignKey(Problem)
+    schedule = models.ForeignKey(Schedule, related_name='solutions')
     date = models.DateField() # flexible
     
     def solved(self):
 
-        if self.date > self.problem.end_date: #stop after time
+        if self.date > self.schedule.end_date: #stop after time
             return True
             
         if self.unwalked().count():
@@ -175,7 +180,7 @@ class Solution(models.Model):
             
 
 class SolutionEntry(models.Model):
-    solution = models.ForeignKey('Schedule', related_name='entries')
+    solution = models.ForeignKey('Solution', related_name='entries')
     pwalker = models.ForeignKey('PWalker')
     node = models.ForeignKey('graph.Node')
     action = models.CharField(null = True, blank = True, max_length = 200)
@@ -313,7 +318,7 @@ class PWalker(models.Model):
         self.save()
         
     def get_play_location(self):
-        return self.solution.problem.walkinglocations.all()[0]
+        return self.solution.schedule.walkinglocations.all()[0]
     
     def full(self, *args, **kwargs):
         return self.carrying.filter(**kwargs).count() == self.capacity
@@ -342,7 +347,7 @@ class PWalker(models.Model):
     
 class PDog(models.Model):
     dog = models.ForeignKey('dog.Dog')
-    solution = models.ForeignKey('Solution', related_name='dogs')
+    solution = models.ForeignKey('Solution', related_name='pdogs')
     pwalker = models.ForeignKey('PWalker', related_name='carrying', null=True)
     node = models.ForeignKey('graph.Node')
     walked = models.BooleanField(default=False)
@@ -383,7 +388,7 @@ class PDog(models.Model):
     
     def validate(self):
         events = self.get_walked_times()
-        s = self.problem.start_date
+        s = self.schedule.start
         w = s + datetime.timedelta(days=7)
         week_events = events.filter(time__gte = s, time__lte = w) # fix for multiple weeks
         if week_events.count() != self.days:
