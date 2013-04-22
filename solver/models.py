@@ -9,6 +9,7 @@ class Problem(models.Model):
     walkinglocations = models.ManyToManyField('dog.WalkingLocation')
     main_solution = models.OneToOneField('Solution', related_name='main_problem', null=True)
     start_date = models.DateField(default = datetime.datetime(2013, 03, 01)) # permanent
+    end_date = models.DateField(default = datetime.datetime(2013, 03, 01)) # permanent
     
     def save(self, *args, **kwargs):
         super(Problem, self).save(*args, **kwargs)
@@ -46,8 +47,8 @@ class Solution(models.Model):
     
     def solved(self):
 
-        if not self.date > self.problem.start_date + datetime.timedelta(days=6): #do full week
-            return False
+        if self.date > self.problem.end_date: #stop after time
+            return True
             
         if self.unwalked().count():
             return False
@@ -75,13 +76,14 @@ class Solution(models.Model):
         if self.date.weekday() >= 5:
             return True
 
-        if self.unwalked().count() and self.find_desirable() and not self.walker_overtime():
-            return False
 
         for pwalker in self.pwalkers.all():
-            if pwalker.carrying.count() or not pwalker.home():
-                return False
+            if pwalker.carrying.count() or not pwalker.home(): 
+                return False #require walkers to drop dogs and get home
 
+        if self.find_desirable() and not self.walker_overtime():
+            return False # if there's something to do and we're still in the day then we're not done 
+        
         return True # No carrying, no available
 
     def walker_overtime(self):
@@ -120,6 +122,7 @@ class SolutionEntry(models.Model):
     solution = models.ForeignKey('Solution', related_name='entries')
     pwalker = models.ForeignKey('PWalker')
     node = models.ForeignKey('graph.Node')
+    action = models.CharField(null = True, blank = True, max_length = 200)
     start = models.DateTimeField()
     end = models.DateTimeField()
     
@@ -179,8 +182,15 @@ class PWalker(models.Model):
             self.play()
         elif self.carrying.filter(walked=True).count():
             self.drop_closest()
+        elif self.home():
+            self.wait(minutes=20) 
         else:
             self.drive_home()
+
+    def wait(self, **kwargs):
+        print "%s is waiting at %s" % (self.walker.name, self.node.address)
+        self.time += datetime.timedelta(**kwargs)
+        self.save()
 
     def drive_home(self):
         print "%s drove home" % self.walker.name
@@ -208,6 +218,7 @@ class PWalker(models.Model):
         if best.walked:
             self.drop(best)
         elif best.score(self) > 0:
+            print "%s can't find anything desirable to do" % self.walker.name
             self.end_day()
         else:
             self.pick(best)
@@ -223,7 +234,7 @@ class PWalker(models.Model):
         print "%s drop" % self.walker.name
         self.node = pdog.node
         self.carrying.remove(pdog)
-        self.save()
+        self.save(action='Drop off')
 
         pdog.pwalker = None
         pdog.carried = False
@@ -233,7 +244,7 @@ class PWalker(models.Model):
         print "%s pick" % self.walker.name
         self.node = pdog.node
         self.carrying.add(pdog)
-        self.save()
+        self.save(action='Pick up')
         
         pdog.carried = True
         pdog.pwalker = self
@@ -261,11 +272,14 @@ class PWalker(models.Model):
             self.last_entry = e
             self.save()
         else:    
+            action = None
+            if 'action' in kwargs:
+                action = kwargs.pop('action')    
             if self.last_entry.node != self.node:
                 edge = Edge.objects.filter(nodes=self.last_entry.node).get(nodes = self.node)
                 self.time = self.time + datetime.timedelta(seconds=edge.seconds)
                 self.last_entry = self.solution.entries.create(pwalker = self, node = self.node, 
-                                                                start = self.time)
+                                                                start = self.time, action = action) 
                 self.time = self.last_entry.end
             super(PWalker, self).save(*args, **kwargs)
         
@@ -310,3 +324,13 @@ class PDog(models.Model):
     def next_date(self):
         self.walked = False
         self.save()
+    
+    def validate(self):
+        events = self.get_walked_times()
+        s = self.problem.start_date
+        w = s + datetime.timedelta(days=7)
+        week_events = events.filter(time__gte = s, time__lte = w) # fix for multiple weeks
+        if week_events.count() != self.days:
+            return False
+        # add validation for required walks
+        return True    

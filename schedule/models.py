@@ -22,9 +22,10 @@ class Schedule(TimeStampedModel):
     problem = models.ForeignKey(Problem, null=True, blank=True)
     solutions = models.ManyToManyField(Solution, null=True, blank=True)
     start = models.DateField()
+    end = models.DateField()
     
     def solve(self):
-        self.problem = Problem(start_date = self.start)
+        self.problem = Problem(start_date = self.start, end_date = self.end)
         self.problem.save()
         
         self.problem.walkers = self.walkers.all()
@@ -42,9 +43,11 @@ class Schedule(TimeStampedModel):
 
         d1 = datetime.datetime.strptime("10:00:00", "%H:%M:%S")
         for e in chosen.entries.all():
-           self.entries.create(walker = e.pwalker.walker, node = e.node,  
+           self.entries.create(walker = e.pwalker.walker,
+                                node = e.node,  
                                 start = e.start,
-                                end = e.end) 
+                                end = e.end,
+                                action = e.action) 
         
         self.save()
 
@@ -64,6 +67,24 @@ class Schedule(TimeStampedModel):
             res.append([d, self.entries.filter(start__day = d.day).order_by('walker', 'start')])
             
         return res
+    
+    def entries_by_dog(self):
+        res = []
+        for d in self.dogs.all():
+            res.append([d, self.entries.filter(node=d.node).order_by('start')])
+        return res
+        
+    #def status_by_dog(self):
+    #    res = []
+
+    #    for d in self.dogs.all():
+    #        t = self.start
+    #        while t < self.end:
+    #            t += datetime.timedelta(days=7)
+                
+            
+
+        
 
 class ScheduleEntry(TimeStampedModel):
     class Meta:
@@ -74,4 +95,5 @@ class ScheduleEntry(TimeStampedModel):
     walker = models.ForeignKey(Walker)
     node = models.ForeignKey(Node)
     schedule = models.ForeignKey(Schedule, related_name='entries')
+    action = models.CharField(max_length = 200, null=True, blank=True)
 

@@ -3,5 +3,6 @@ from django.conf import settings
 
 urlpatterns = patterns('',
     url('(?P<pk>\d+)/map/', 'schedule.views.map'),
-    url('(?P<pk>\d+)/', 'schedule.views.show')
+    url('(?P<pk>\d+)/dogs/', 'schedule.views.dogs'),
+    url('(?P<pk>\d+)/', 'schedule.views.show'),
 )

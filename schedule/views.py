@@ -36,3 +36,7 @@ def map(request, pk):
     #entries = Schedule.objects.get(pk=pk).entries.all()
     
     return render_to_response('schedule/map.html', {'entries': entries})
+
+def dogs(request, pk):
+    w = Schedule.objects.all()[0]
+    return render_to_response('schedule/dogs.html', {'w': w})
