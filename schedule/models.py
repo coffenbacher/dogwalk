@@ -19,13 +19,15 @@ DAYS = (
 class Schedule(TimeStampedModel):
     walkers = models.ManyToManyField(Walker)
     dogs = models.ManyToManyField(Dog)
+    walkinglocations = models.ManyToManyField(WalkingLocation)
     start = models.DateField()
     end = models.DateField()
+    main_solution = models.ForeignKey('Solution', related_name='main_schedule', null=True, blank=True)
     
     def save(self, *args, **kwargs):
         super(Schedule, self).save(*args, **kwargs)
-       
-        self.init()
+        if not self.pk:
+            self.init()
     
     def init(self):    
         s = Solution.objects.get_or_create(schedule = self, date = self.start)[0]
@@ -43,7 +45,10 @@ class Schedule(TimeStampedModel):
             PWalker.objects.get_or_create(solution = s, node = w.node, walker = w, time=dt)
         for d in self.dogs.all():
             PDog.objects.get_or_create(solution = s, node = d.node, dog = d)
+        
         self.main_solution = s
+        self.walkinglocations = WalkingLocation.objects.all() #hack
+        self.save()
 
     def solve(self):
         s = self.main_solution
@@ -59,39 +64,29 @@ class Schedule(TimeStampedModel):
         return s
 
     def choose_solution(self):
-        chosen = self.solutions.all()[0] # automatically pick first solution
-
-        d1 = datetime.datetime.strptime("10:00:00", "%H:%M:%S")
-        for e in chosen.entries.all():
-           self.entries.create(walker = e.pwalker.walker,
-                                node = e.node,  
-                                start = e.start,
-                                end = e.end,
-                                action = e.action) 
-        
+        self.main_solution = self.solutions.all()[0] # automatically pick first solution
         self.save()
 
     def entries_by_walker(self):
         res = []
-        for w in self.walkers.all():
-            res.append([w, self.entries.filter(walker=w)])
+        for w in self.main_solution.pwalkers.all():
+            res.append([w, self.main_solution.entries.filter(pwalker = w)])
         return res
     
     def entries_by_day(self):
-        
-        entries = self.entries.all()
+        entries = self.main_solution.entries.all()
         days = entries.dates('start', 'day')
 
         res = []
         for d in days:
-            res.append([d, self.entries.filter(start__day = d.day).order_by('walker', 'start')])
+            res.append([d, self.main_solution.entries.filter(start__day = d.day).order_by('pwalker', 'start')])
             
         return res
     
     def entries_by_dog(self):
         res = []
-        for d in self.dogs.all():
-            res.append([d, self.entries.filter(node=d.node).order_by('start')])
+        for d in self.main_solution.pdogs.all():
+            res.append([d, self.main_solution.entries.filter(node=d.node).order_by('start')])
         return res
         
     #def status_by_dog(self):
@@ -113,7 +108,7 @@ class Solution(models.Model):
     
     def solved(self):
 
-        if self.date > self.schedule.end_date: #stop after time
+        if self.date > self.schedule.end: #stop after time
             return True
             
         if self.unwalked().count():
@@ -164,20 +159,26 @@ class Solution(models.Model):
         for pwalker in self.pwalkers.all():
             pwalker.next_date()
 
-        for pdog in self.dogs.all():
+        for pdog in self.pdogs.all():
             pdog.next_date()
             
         self.save()
 
     def available(self):
-        return self.dogs.filter(walked=False, carried=False)
+        return self.pdogs.filter(walked=False, carried=False)
     
     def unwalked(self):
-        return self.dogs.filter(walked=False)
+        return self.pdogs.filter(walked=False)
         
     def walked(self):
-        return self.dogs.filter(walked=True)
+        return self.pdogs.filter(walked=True)
             
+    def validate_dogs(self):
+        """ Returns boolean, [details] """
+        for d in self.pdogs.all():
+            if not d.validate(): 
+                return False
+        return True    
 
 class SolutionEntry(models.Model):
     solution = models.ForeignKey('Solution', related_name='entries')
@@ -313,6 +314,9 @@ class PWalker(models.Model):
     
     def play(self):
         print "%s play" % self.walker.name
+        if self.carrying.filter(walked=True):
+            print "%s is still carrying walked dogs, dropping closest" % self.walker.name
+            self.drop_closest()
         self.node = self.get_play_location().node
         [pdog.play() for pdog in self.carrying.all()]
         self.save()
@@ -364,13 +368,13 @@ class PDog(models.Model):
     def get_time_desirability(self, time):
         for t in self.get_desirable_times():
             if time >= t[0] and time <= t[1]:
-                return -10000 #required to walk during this time
+                return -20000 #required to walk during this time
         if self.get_walked_times(time__gte = time - datetime.timedelta(hours = 16)):
-            return 1000 # too many walks last day
-        if self.get_walked_times(time__gte = time - datetime.timedelta(days = 7)).count() > self.dog.days:
-            return 10000 # too many walks this week
+            return 2000 # too many walks last day
+        if self.get_walked_times(time__gte = time - datetime.timedelta(days = 7)).count() >= self.dog.days:
+            return 20000 # too many walks this week
 
-        return -1000 #decent       
+        return self.dog.days / 5.0 * -10000 #decent       
 
     def get_walked_times(self, **kwargs):
         return self.events.filter(type='Walk').filter(**kwargs)
@@ -388,10 +392,13 @@ class PDog(models.Model):
     
     def validate(self):
         events = self.get_walked_times()
-        s = self.schedule.start
+        s = self.solution.schedule.start
         w = s + datetime.timedelta(days=7)
         week_events = events.filter(time__gte = s, time__lte = w) # fix for multiple weeks
-        if week_events.count() != self.days:
+        if week_events.count() != self.dog.days:
             return False
         # add validation for required walks
         return True    
+    
+    def __unicode__(self):
+        return self.dog.name

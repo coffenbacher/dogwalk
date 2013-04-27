@@ -2,11 +2,20 @@ import pdb
 from django.test import TestCase
 from django.test.client import Client
 from django.contrib.auth.models import *
+from dog.helpers import basic_solution
+from schedule.models import *
 from models import *
 
-class ModelTest(TestCase):
+class TwP_Helper_Test(TestCase):
+    fixtures = ['initial_data.json', 'twp.json']
+    
     def setUp(self):
         pass
+    
+    def test_basic_solution(self):
+        basic_solution()
+        s = Solution.objects.all()[0]
+        self.assertTrue(s.validate_dogs())
     
 """class LoggedOutTest(TestCase):
     fixtures = ['initial_data.json', 'test.json']

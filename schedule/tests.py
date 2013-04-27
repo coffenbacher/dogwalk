@@ -22,3 +22,6 @@ class ScheduleTest(TestCase):
         self.assertTrue(solution.pwalkers.all())
         self.assertTrue(solution.pdogs.all())
         
+    def test_solve(self):
+        self.s.init()
+        self.s.solve()

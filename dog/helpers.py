@@ -9,6 +9,7 @@ def basic_solution():
                                 end = datetime.date.today() + datetime.timedelta(days = 8))
     w.dogs=Dog.objects.all()
     w.walkers=Walker.objects.all()
+    w.init()
     
     w.solve()
     w.choose_solution()

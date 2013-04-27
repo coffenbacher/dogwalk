@@ -5,7 +5,7 @@
   <h1>Weekly Schedule</h1>
   <p>
     {% for l in w.entries_by_dog %}
-    <h2>{{ l.0 }} ( {{ l.0.days }} / week )</h2>
+    <h2 style="{% if not l.0.validate %}color: red {% endif %}">{{ l.0.dog }} ( {{ l.0.dog.days }} / week )</h2>
     <table>
         <tr>
             <th>Time</th>
@@ -17,7 +17,7 @@
         <tr>
             <td>{{ e.start|date:"D M d g:i A" }}</td>
             <td>{{ e.action }}</td>
-            <td>{{ e.walker }}</td>
+            <td>{{ e.pwalker.walker }}</td>
         </tr>
         {% endfor %}
     </table>
