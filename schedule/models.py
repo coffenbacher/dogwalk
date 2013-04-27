@@ -365,26 +365,48 @@ class PDog(models.Model):
         self.events.create(time = self.pwalker.time, type='Walk')
         self.save()
 
-    def get_time_desirability(self, time):
+    def during_a_required_time(self, time):
         for t in self.get_desirable_times():
             if time >= t[0] and time <= t[1]:
-                return -20000 #required to walk during this time
-        if self.get_walked_times(time__gte = time - datetime.timedelta(hours = 16)):
-            return 2000 # too many walks last day
-        if self.get_walked_times(time__gte = time - datetime.timedelta(days = 7)).count() >= self.dog.days:
-            return 20000 # too many walks this week
+                return -100000 #required to walk during this time
+        return 0        
 
-        return self.dog.days / 5.0 * -10000 #decent       
+    def walked_during_last_day(self, time):
+        if self.get_walked_times(time__gte = time - datetime.timedelta(hours = 16)):
+            return 10000 # too many walks last day
+        return 0        
+
+    def walked_too_many_times_during_last_week(self, time):    
+        if self.get_walked_times(time__gte = time - datetime.timedelta(days = 7)).count() >= self.dog.days:
+            return 10000 # too many walks this week
+        return 0    
+    
+    def weight_based_on_days(self):
+        return self.dog.days / 5.0 * -10000
+            
+    def being_walked(self):
+        # factor in double walks
+        if not self.walked and self.pwalker:
+            return 1000000
+        return 0    
+
+    def get_time_desirability(self, time):
+        s = 0
+        s += self.during_a_required_time(time)
+        s += self.walked_during_last_day(time)
+        s += self.walked_too_many_times_during_last_week(time)
+        s += self.weight_based_on_days()
+
+        return s
 
     def get_walked_times(self, **kwargs):
         return self.events.filter(type='Walk').filter(**kwargs)
         
     def score(self, pwalker):
-        if not self.walked and self.pwalker:
-            return 10000
         d = self.node.get_distance(pwalker.node)
+        w = self.being_walked()
         t = self.get_time_desirability(pwalker.time)
-        return d + t
+        return d + t + w
 
     def next_date(self):
         self.walked = False
