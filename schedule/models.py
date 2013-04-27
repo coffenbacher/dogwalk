@@ -1,9 +1,14 @@
 import datetime
+import inspect
+import logging
 from django_extensions.db.models import TimeStampedModel
 from dog.models import *
 from graph.models import *
 from django.db import models
 import pdb
+
+ma_logger = logging.getLogger('MA')
+ms_logger = logging.getLogger('MS')
 
 # Create your models here.
 DAYS = (
@@ -130,10 +135,6 @@ class Solution(models.Model):
         return False # no desirable found
     
     def day_complete(self):
-        print "Unwalked: ", self.unwalked().count()
-        print "Available: ", self.available().count()
-        print "Walked: ", self.walked().count()
-
         if self.date.weekday() >= 5:
             return True
 
@@ -205,10 +206,22 @@ class PWalker(models.Model):
     node = models.ForeignKey('graph.Node')
     time = models.DateTimeField()
     
+    def get_log_info(self):
+        d = {   
+                'walker':   self.walker.name,
+                'time':     self.time,
+                'node':     self.node.address,
+                'carrying':     str(self.carrying.all()) + ' '*100,
+            }
+        return d
+    
+    def log(self, a):
+        ma_logger.debug(a, extra=self.get_log_info())
+        
     def turn(self):
-        print "%s taking turn at" % self.walker.name, self.time
+        self.log('taking turn')
         if self.done():
-            print "Done"
+            self.log('done')
         elif self.done_with_dogs() or self.time.time() > self.walker.end_time:
             self.end_day()
         elif (self.carrying.count() >= self.capacity) or not self.solution.available().count():
@@ -235,11 +248,11 @@ class PWalker(models.Model):
             raise Exception("Walker %s didn't make it home" % self.walker.name)
 
     def end_day(self):
-        print "%s ending day" % self.walker.name
+        self.log('ending day')
         self.go_home()
 
     def go_home(self):
-        print "%s going home" % self.walker.name
+        self.log('planning home')
         if self.carrying.filter(walked=False).count():
             self.play()
         elif self.carrying.filter(walked=True).count():
@@ -250,12 +263,12 @@ class PWalker(models.Model):
             self.drive_home()
 
     def wait(self, **kwargs):
-        print "%s is waiting at %s" % (self.walker.name, self.node.address)
+        self.log('waiting')
         self.time += datetime.timedelta(**kwargs)
         self.save()
 
     def drive_home(self):
-        print "%s drove home" % self.walker.name
+        self.log('drove home')
         self.node = self.walker.node
         self.save()
 
@@ -263,7 +276,7 @@ class PWalker(models.Model):
         return self.node == self.walker.node
 
     def drop_or_play(self):
-        print "%s drop_or_play" % self.walker.name
+        self.log('drop or play?')
         if self.full(walked=False) or self.last_trip():
             self.play()
         elif self.carrying.filter(walked=True):
@@ -272,7 +285,7 @@ class PWalker(models.Model):
             self.end_day()
 
     def drop_or_pick(self):    
-        print "%s drop_or_pick" % self.walker.name
+        self.log('drop or pick?')
         pdogs = list(self.carrying.all()) + list(self.solution.available().all()) 
         
         best = sorted(pdogs, key=lambda n: n.score(self))[0]
@@ -280,20 +293,20 @@ class PWalker(models.Model):
         if best.walked:
             self.drop(best)
         elif best.score(self) > 0:
-            print "%s can't find anything desirable to do" % self.walker.name
+            self.log('nothing desirable')
             self.end_day()
         else:
             self.pick(best)
         
     def drop_closest(self):
         pdogs = self.carrying.filter(walked=True)
-        print "%s drop_closest, %s" % (self.walker.name, pdogs)
+        self.log('drop closest')
         
         best = sorted(pdogs, key=lambda n: n.score(self))[0]
         self.drop(best)
         
     def drop(self, pdog):
-        print "%s drop" % self.walker.name
+        self.log('drop %s' % pdog)
         self.node = pdog.node
         self.carrying.remove(pdog)
         self.save(action='Drop off')
@@ -303,7 +316,7 @@ class PWalker(models.Model):
         pdog.save()
     
     def pick(self, pdog):
-        print "%s pick" % self.walker.name
+        self.log('pick %s' % pdog)
         self.node = pdog.node
         self.carrying.add(pdog)
         self.save(action='Pick up')
@@ -313,9 +326,9 @@ class PWalker(models.Model):
         pdog.save()
     
     def play(self):
-        print "%s play" % self.walker.name
+        self.log('play')
         if self.carrying.filter(walked=True):
-            print "%s is still carrying walked dogs, dropping closest" % self.walker.name
+            self.log('already walked dogs')
             self.drop_closest()
         self.node = self.get_play_location().node
         [pdog.play() for pdog in self.carrying.all()]
@@ -399,6 +412,22 @@ class PDog(models.Model):
 
         return s
 
+    def log(self, a, pwalker, d, w, t, s):
+        d = {
+            'context'       :   inspect.stack()[3][3] + ' '*100,
+            'walker'        :   pwalker.walker.name,
+            'w_node'        :   pwalker.node,
+            'dog'           :   self,
+            'd_node'        :   self.node,
+            'time'          :   pwalker.time,
+            'd'             :   d,
+            'w'             :   w,
+            't'             :   t,
+            'score'         :   s,
+        }
+            
+        ms_logger.debug(a, extra=d)
+
     def get_walked_times(self, **kwargs):
         return self.events.filter(type='Walk').filter(**kwargs)
         
@@ -406,6 +435,8 @@ class PDog(models.Model):
         d = self.node.get_distance(pwalker.node)
         w = self.being_walked()
         t = self.get_time_desirability(pwalker.time)
+        s = d + t + w
+        self.log(' ', pwalker, d, w, t, s)
         return d + t + w
 
     def next_date(self):
@@ -422,5 +453,8 @@ class PDog(models.Model):
         # add validation for required walks
         return True    
     
+    def __repr__(self):
+        return self.dog.name.strip()
+    
     def __unicode__(self):
-        return self.dog.name
+        return self.dog.name.strip()

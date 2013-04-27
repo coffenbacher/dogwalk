@@ -141,24 +141,42 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'MA': {
+            'format': '%(levelname)s\t%(time).16s\t%(walker).6s\t%(node).12s\t%(carrying).80s\t%(message)s'
+        },
+        'MS': {
+            'format': '%(levelname)s\t%(time).16s\t%(context).12s\t%(walker).6s\t%(dog).6s\td:%(d)d\tw:%(w)d\tt:%(t)d\t%(score)d\t%(message)s'
+        },
     },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+        'MA': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'MA.log',
+            'formatter': 'MA'
+            },
+        'MS': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'MS.log',
+            'formatter': 'MS'
+        },
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+        'MA': {
+            'handlers': ['MA'],
+            'level': 'DEBUG',
             'propagate': True,
         },
+        'MS': {
+            'handlers': ['MS'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     }
 }
 
@@ -187,3 +205,5 @@ TEST_RUNNER = 'ignoretests.DjangoIgnoreTestSuiteRunner'
 IGNORE_TESTS = (
     'django_extensions',
 )
+
+
