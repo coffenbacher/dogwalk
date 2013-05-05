@@ -22,6 +22,8 @@ DAYS = (
         (6, 'Sunday'),
         )
 
+ABSOLUTELY_NOT = 10000
+
 class Schedule(TimeStampedModel):
     walkers = models.ManyToManyField(Walker)
     dogs = models.ManyToManyField(Dog)
@@ -398,6 +400,13 @@ class PDog(models.Model):
     def weight_based_on_days(self):
         return self.dog.days / 5.0 * -10000
             
+    def incompatible_dogs(self, others):
+        incompat = self.dog.incompatible.all()
+        for d in others:
+            if d.dog in incompat:
+                return ABSOLUTELY_NOT
+        return 0     
+        
     def being_walked(self):
         # factor in double walks
         if not self.walked and self.pwalker:
@@ -413,7 +422,7 @@ class PDog(models.Model):
 
         return s
 
-    def log(self, a, pwalker, d, w, t, s):
+    def log(self, a, pwalker, d, w, i, t, s):
         d = {
             'context'       :   inspect.stack()[3][3] + ' '*100,
             'walker'        :   pwalker.walker.name,
@@ -423,6 +432,7 @@ class PDog(models.Model):
             'time'          :   pwalker.time,
             'd'             :   d,
             'w'             :   w,
+            'i'             :   i,
             't'             :   t,
             'score'         :   s,
         }
@@ -435,10 +445,11 @@ class PDog(models.Model):
     def score(self, pwalker):
         d = self.node.get_distance(pwalker.node)
         w = self.being_walked()
+        i = self.incompatible_dogs(pwalker.carrying.all())
         t = self.get_time_desirability(pwalker.time)
-        s = d + t + w
-        self.log(' ', pwalker, d, w, t, s)
-        return d + t + w
+        s = d + t + w + i
+        self.log(' ', pwalker, d, w, i, t, s)
+        return s
 
     def next_date(self):
         self.walked = False
