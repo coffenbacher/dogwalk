@@ -9,6 +9,7 @@ import pdb
 
 ma_logger = logging.getLogger('MA')
 ms_logger = logging.getLogger('MS')
+mv_logger = logging.getLogger('MV')
 
 # Create your models here.
 DAYS = (
@@ -253,10 +254,10 @@ class PWalker(models.Model):
 
     def go_home(self):
         self.log('planning home')
-        if self.carrying.filter(walked=False).count():
-            self.play()
-        elif self.carrying.filter(walked=True).count():
+        if self.carrying.filter(walked=True).count():
             self.drop_closest()
+        elif self.carrying.filter(walked=False).count():
+            self.play()
         elif self.home():
             self.wait(minutes=20) 
         else:
@@ -449,9 +450,19 @@ class PDog(models.Model):
         w = s + datetime.timedelta(days=7)
         week_events = events.filter(time__gte = s, time__lte = w) # fix for multiple weeks
         if week_events.count() != self.dog.days:
-            return False
-        # add validation for required walks
-        return True    
+            res = False
+        else:
+            res = True
+        
+        d = {
+            'start'         : s,
+            'end'           : w,
+            'dog'           : self.dog,
+            'days'          : self.dog.days,
+            'events'        : week_events.count(),
+        }
+        mv_logger.debug(str(res), extra=d)
+        return res
     
     def __repr__(self):
         return self.dog.name.strip()

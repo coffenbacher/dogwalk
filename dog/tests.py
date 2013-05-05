@@ -15,6 +15,9 @@ class TwP_Helper_Test(TestCase):
     def test_basic_solution(self):
         basic_solution()
         s = Solution.objects.all()[0]
+        for d in s.pdogs.all():
+            if not d.validate():
+                print "%s FAILED" % d
         self.assertTrue(s.validate_dogs())
     
 """class LoggedOutTest(TestCase):

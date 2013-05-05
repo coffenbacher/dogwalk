@@ -151,6 +151,9 @@ LOGGING = {
         'MS': {
             'format': '%(levelname)s\t%(time).16s\t%(context).12s\t%(walker).6s\t%(dog).6s\td:%(d)d\tw:%(w)d\tt:%(t)d\t%(score)d\t%(message)s'
         },
+        'MV': {
+            'format': '%(levelname)s\t%(start).16s\t%(end).16s\t\t%(dog).6s\t%(days)d\t%(events)d\t%(message)s'
+        }
     },
     'handlers': {
         'MA': {
@@ -165,6 +168,12 @@ LOGGING = {
             'filename': 'MS.log',
             'formatter': 'MS'
         },
+        'MV': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'MV.log',
+            'formatter': 'MV'
+        }
     },
     'loggers': {
         'MA': {
@@ -174,6 +183,11 @@ LOGGING = {
         },
         'MS': {
             'handlers': ['MS'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'MV': {
+            'handlers': ['MV'],
             'level': 'DEBUG',
             'propagate': True,
         }
