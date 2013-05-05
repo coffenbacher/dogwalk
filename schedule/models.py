@@ -115,18 +115,7 @@ class Solution(models.Model):
     date = models.DateField() # flexible
     
     def solved(self):
-
-        if self.date > self.schedule.end: #stop after time
-            return True
-            
-        if self.unwalked().count():
-            return False
-    
-        for pwalker in self.pwalkers.all():
-            if pwalker.carrying.count() or pwalker.node != pwalker.walker.node:
-                return False
-
-        return True # No carrying, no available
+        return self.date > self.schedule.end
     
     def find_desirable(self): # make sure there is some desirable move for someone left
         for pwalker in self.pwalkers.all():
@@ -473,6 +462,9 @@ class PDog(models.Model):
             'events'        : week_events.count(),
         }
         mv_logger.debug(str(res), extra=d)
+        
+        #required = self.dog.requiredwalks.all()
+        #for r in required: 
         return res
     
     def __repr__(self):

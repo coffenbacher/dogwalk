@@ -1,0 +1,82 @@
+[
+    {
+        "pk": 1,
+        "model": "dog.dog",
+        "fields": {
+                "node": 1,
+                "name": "Alpha Dog",
+                "days": 5,
+                "address": ""
+        }
+    },
+    {
+        "pk": 1,
+        "model": "graph.node",
+        "fields": {
+                "seconds": 420.0,
+                "address": ""
+        }
+    },
+
+
+    {
+        "pk": 222, 
+        "model": "dog.walker", 
+        "fields": {
+                "node": 222, 
+                "capacity": 9, 
+                "name": "Walker 1"
+        }
+    },
+    {
+        "pk": 222,
+        "model": "graph.node",
+        "fields": {
+                "seconds": 420.0,
+                "address": ""
+        }
+    },
+    {
+        "pk": 900,
+        "model": "graph.edge",
+        "fields": {
+                "nodes": [1, 222],
+                "seconds": 1
+                }
+    },
+    
+
+    {
+        "pk": 300, 
+        "model": "dog.walkinglocation", 
+        "fields": {
+                "node": 300, 
+                "address": ""
+                }
+    },
+    {
+        "pk": 300,
+        "model": "graph.node",
+        "fields": {
+                "seconds": 420.0,
+                "address": ""
+        }
+    },
+    {
+        "pk": 901,
+        "model": "graph.edge",
+        "fields": {
+                "nodes": [1, 300],
+                "seconds": 1
+                }
+    },
+    {
+        "pk": 902,
+        "model": "graph.edge",
+        "fields": {
+                "nodes": [222, 300],
+                "seconds": 1
+                }
+    }
+]
+
