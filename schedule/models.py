@@ -1,3 +1,4 @@
+from dateutil import parser
 import datetime
 import inspect
 import logging
@@ -41,7 +42,7 @@ class Schedule(TimeStampedModel):
         s = Solution.objects.get_or_create(schedule = self, date = self.start)[0]
         
         if isinstance(self.start, basestring):
-            self.start = datetime.datetime.strptime(self.start, '%Y-%m-%d')
+            self.start = parser.parse(self.start + ' EST')
         
         for w in self.walkers.all():
             dt = datetime.datetime(self.start.year, 
@@ -378,14 +379,19 @@ class PDog(models.Model):
 
     def walked_during_last_day(self, time):
         if self.get_walked_times(time__gte = time - datetime.timedelta(hours = 16)):
-            return 10000 # too many walks last day
+            return ABSOLUTELY_NOT # too many walks last day
         return 0        
 
     def walked_too_many_times_during_last_week(self, time):    
-        if self.get_walked_times(time__gte = time - datetime.timedelta(days = 7)).count() >= self.dog.days:
-            return 10000 # too many walks this week
+        if self.get_walked_times(time__gt = time - datetime.timedelta(days = 7, hours = -8)).count() >= self.dog.days:
+            return ABSOLUTELY_NOT # too many walks this week
         return 0    
     
+    def weight_based_on_spacing(self, time):
+        if self.dog.days <= 3 and self.get_walked_times(time__gte = time - datetime.timedelta(hours = 40)):
+            return ABSOLUTELY_NOT
+        return 0    
+
     def weight_based_on_days(self):
         return self.dog.days / 5.0 * -10000
             
@@ -408,6 +414,7 @@ class PDog(models.Model):
         s += self.walked_during_last_day(time)
         s += self.walked_too_many_times_during_last_week(time)
         s += self.weight_based_on_days()
+        s += self.weight_based_on_spacing(time)
 
         return s
 

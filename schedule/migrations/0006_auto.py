@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.utils import timezone
 import datetime
 from south.db import db
 from south.v2 import SchemaMigration
@@ -27,11 +28,11 @@ class Migration(SchemaMigration):
         u'dog.dog': {
             'Meta': {'ordering': "('-modified', '-created')", 'object_name': 'Dog'},
             'address': ('django.db.models.fields.TextField', [], {}),
-            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'timezone.now', 'blank': 'True'}),
             'days': ('django.db.models.fields.PositiveIntegerField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'incompatible': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': u"orm['dog.Dog']", 'null': 'True', 'blank': 'True'}),
-            'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
+            'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'timezone.now', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'node': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'dog'", 'unique': 'True', 'blank': 'True', 'to': u"orm['graph.Node']"})
         },
@@ -39,10 +40,10 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "('-modified', '-created')", 'object_name': 'Walker'},
             'address': ('django.db.models.fields.TextField', [], {}),
             'capacity': ('django.db.models.fields.PositiveIntegerField', [], {'default': '9'}),
-            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'timezone.now', 'blank': 'True'}),
             'end_time': ('django.db.models.fields.TimeField', [], {'default': "'15:00:00'"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
+            'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'timezone.now', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'node': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'walkers'", 'to': u"orm['graph.Node']"}),
             'start_time': ('django.db.models.fields.TimeField', [], {'default': "'10:00:00'"})
@@ -50,9 +51,9 @@ class Migration(SchemaMigration):
         u'dog.walkinglocation': {
             'Meta': {'ordering': "('-modified', '-created')", 'object_name': 'WalkingLocation'},
             'address': ('django.db.models.fields.TextField', [], {}),
-            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'timezone.now', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
+            'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'timezone.now', 'blank': 'True'}),
             'node': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['graph.Node']"})
         },
         u'graph.node': {
@@ -90,12 +91,12 @@ class Migration(SchemaMigration):
         },
         u'schedule.schedule': {
             'Meta': {'ordering': "('-modified', '-created')", 'object_name': 'Schedule'},
-            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'timezone.now', 'blank': 'True'}),
             'dogs': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['dog.Dog']", 'symmetrical': 'False'}),
             'end': ('django.db.models.fields.DateField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'main_solution': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'main_schedule'", 'null': 'True', 'to': u"orm['schedule.Solution']"}),
-            'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
+            'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'timezone.now', 'blank': 'True'}),
             'start': ('django.db.models.fields.DateField', [], {}),
             'walkers': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['dog.Walker']", 'symmetrical': 'False'}),
             'walkinglocations': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['dog.WalkingLocation']", 'symmetrical': 'False'})

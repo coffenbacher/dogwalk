@@ -36,8 +36,9 @@ class LoggedInTest(TestCase):
         response = self.client.get('/static/bootstrap.css')
         self.failUnlessEqual(response.status_code, 200)
 
-class BasicTest(TestCase):
-    fixtures = ['hand.json']
+
+class OneDogTest(TestCase):
+    fixtures = ['one_dog.json']
 
     def test_basic_solution(self):
         basic_solution()
@@ -46,6 +47,22 @@ class BasicTest(TestCase):
             if not d.validate():
                 print "%s FAILED" % d
         self.assertTrue(s.validate_dogs())
+
+
+class SpacingTest(TestCase):
+    fixtures = ['one_dog.json']
+    def setUp(self):
+        Dog.objects.filter(name='Alpha Dog').update(days=3)
+
+    def test_days(self):
+        basic_solution()
+        self.assertTrue(Solution.objects.all()[0].validate_dogs())
+
+    def test_spacing(self):
+        basic_solution()
+        for s in Event.objects.all():
+            self.assertTrue(s.time.weekday() in [0, 2, 4])
+    
 
 class TwPTest(TestCase):
     fixtures = ['initial_data.json', 'twp.json']
