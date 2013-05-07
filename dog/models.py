@@ -29,6 +29,10 @@ class Dog(TimeStampedModel):
     def __unicode__(self):
         return self.name
         
+class CancelledWalk(TimeStampedModel):
+    dog = models.ForeignKey(Dog, related_name='cancellations')
+    date = models.DateField()
+
 class RequiredWalk(TimeStampedModel):
     dog = models.ForeignKey(Dog, related_name='requiredwalks')
     after = models.TimeField(verbose_name="Pick up after", null=True, blank=True)

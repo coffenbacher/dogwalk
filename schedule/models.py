@@ -415,7 +415,7 @@ class PDog(models.Model):
         s += self.walked_too_many_times_during_last_week(time)
         s += self.weight_based_on_days()
         s += self.weight_based_on_spacing(time)
-
+        s += self.cancelled(time)
         return s
 
     def log(self, a, pwalker, d, w, i, t, s):
@@ -437,6 +437,14 @@ class PDog(models.Model):
 
     def get_walked_times(self, **kwargs):
         return self.events.filter(type='Walk').filter(**kwargs)
+    
+    def cancelled(self, time):
+        if self.dog.cancellations.filter(
+            date__gte = time.date() + datetime.timedelta(days = -5.0 / self.dog.days + 1),
+            date__lte = time.date() + datetime.timedelta(days = 5.0 / self.dog.days - 1)
+            ):
+            return 9999
+        return 0    
         
     def score(self, pwalker):
         d = self.node.get_distance(pwalker.node)
@@ -454,9 +462,10 @@ class PDog(models.Model):
     def validate(self):
         events = self.get_walked_times()
         s = self.solution.schedule.start
-        w = s + datetime.timedelta(days=7)
+        w = self.solution.schedule.end
         week_events = events.filter(time__gte = s, time__lte = w) # fix for multiple weeks
-        if week_events.count() != self.dog.days:
+        cancellations = self.dog.cancellations.filter(date__gte = s, date__lte = w)
+        if week_events.count() + cancellations.count() != self.dog.days:
             res = False
         else:
             res = True
@@ -467,6 +476,7 @@ class PDog(models.Model):
             'dog'           : self.dog,
             'days'          : self.dog.days,
             'events'        : week_events.count(),
+            'cancellations' : cancellations.count(),
         }
         mv_logger.debug(str(res), extra=d)
         
