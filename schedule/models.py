@@ -468,7 +468,7 @@ class PDog(models.Model):
         if week_events.count() + cancellations.count() != self.dog.days:
             res = False
         else:
-            res = True
+            res = all([self.__validate_required(week_events, rw) for rw in self.dog.requiredwalks.all()])
         
         d = {
             'start'         : s,
@@ -484,6 +484,14 @@ class PDog(models.Model):
         #for r in required: 
         return res
     
+    def __validate_required(self, events, rw):
+        for e in events:
+            if e.time >= rw.after and e.time <= rw.before:
+                return True
+        return False        
+            
+
+
     def __repr__(self):
         return self.dog.name.strip()
     
