@@ -23,7 +23,8 @@ DAYS = (
         (6, 'Sunday'),
         )
 
-ABSOLUTELY_NOT = 10000
+ABSOLUTELY_NOT = 10**5
+REQUIRED = -10**6
 
 class Schedule(TimeStampedModel):
     walkers = models.ManyToManyField(Walker)
@@ -374,7 +375,7 @@ class PDog(models.Model):
     def during_a_required_time(self, time):
         for t in self.get_desirable_times():
             if time >= t[0] and time <= t[1]:
-                return -100000 #required to walk during this time
+                return REQUIRED #required to walk during this time
         return 0        
 
     def walked_during_last_day(self, time):
