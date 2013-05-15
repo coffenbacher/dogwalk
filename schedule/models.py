@@ -393,6 +393,12 @@ class PDog(models.Model):
             return ABSOLUTELY_NOT
         return 0    
 
+    def weight_based_on_until(self, time):
+        for rw in self.dog.requiredwalks.all():
+            if rw.date == time.date() and time.time() < rw.until:
+                return ABSOLUTELY_NOT
+        return 0    
+
     def weight_based_on_days(self):
         return self.dog.days / 5.0 * -10000
             
@@ -416,6 +422,7 @@ class PDog(models.Model):
         s += self.walked_too_many_times_during_last_week(time)
         s += self.weight_based_on_days()
         s += self.weight_based_on_spacing(time)
+        s += self.weight_based_on_until(time)
         s += self.cancelled(time)
         return s
 

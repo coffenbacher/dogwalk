@@ -37,6 +37,9 @@ class RequiredWalk(TimeStampedModel):
     dog = models.ForeignKey(Dog, related_name='requiredwalks')
     after = models.TimeField(verbose_name="Pick up after", null=True, blank=True)
     before = models.TimeField(verbose_name="Drop off before", null=True, blank=True)
+    until = models.TimeField(verbose_name="Drop off after", null=True, blank=True) #20
+    date = models.DateField(null=True, blank=True) # #17
+    count = models.PositiveIntegerField(verbose_name="How many dates?", default = 1) #18
     days = BitField(flags = DAYS)
 
     def __unicode__(self):
