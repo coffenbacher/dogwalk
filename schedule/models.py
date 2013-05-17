@@ -109,6 +109,7 @@ class Schedule(TimeStampedModel):
 
 class Event(models.Model):
     pdog = models.ForeignKey('PDog', related_name='events')
+    pwalker = models.ForeignKey('PWalker', related_name='events')
     type = models.CharField(max_length = 200)
     time = models.DateTimeField()
                 
@@ -376,7 +377,7 @@ class PDog(models.Model):
     
     def play(self): #fix this for multiple days
         self.walked += 1
-        self.events.create(time = self.pwalker.time, type='Walk')
+        self.events.create(time = self.pwalker.time, pwalker = self.pwalker, type='Walk')
         self.save()
 
     def get_required_walk(self, time):
@@ -437,6 +438,13 @@ class PDog(models.Model):
             return 1000000
         return 0    
 
+    def get_same_walker(self, pwalker):
+        s = 0
+        if self.events.filter(type='Walk').exclude(pwalker=pwalker):
+            return ABSOLUTELY_NOT
+        else:
+            return 100
+
     def get_time_desirability(self, time):
         s = 0
         s += self.during_a_required_time(time)
@@ -482,6 +490,7 @@ class PDog(models.Model):
         w = self.being_walked()
         i = self.incompatible_dogs(pwalker.carrying.all())
         t = self.get_time_desirability(pwalker.time)
+        sw = self.get_same_walker(pwalker)
         s = d + t + w + i
         self.log(' ', pwalker, d, w, i, t, s)
         return s
