@@ -160,13 +160,8 @@ class Solution(models.Model):
         self.save()
 
     def available(self):
-        return self.pdogs.filter(walked=False, carried=False)
-    
-    def unwalked(self):
-        return self.pdogs.filter(walked=False)
-        
-    def walked(self):
-        return self.pdogs.filter(walked=True)
+        #TODO
+        return self.pdogs.filter(carried=False)
             
     def validate_dogs(self):
         """ Returns boolean, [details] """
@@ -227,7 +222,7 @@ class PWalker(models.Model):
         return self.done_with_dogs() and self.node == self.walker.node
         
     def done_with_dogs(self):
-        return not self.solution.unwalked() and not self.carrying.count()
+        return not self.carrying.count()
     
     def start_day(self):
         d = self.time + datetime.timedelta(days=1)
@@ -283,8 +278,9 @@ class PWalker(models.Model):
         pdogs = list(self.carrying.all()) + list(self.solution.available().all()) 
         
         best = sorted(pdogs, key=lambda n: n.score(self))[0]
+        rw = best.get_required_walk(self.time())
         
-        if best.walked:
+        if rw and best.walked >= rw.count or not rw and best.walked:
             self.drop(best)
         elif best.score(self) > 0:
             self.log('nothing desirable')
@@ -361,21 +357,30 @@ class PDog(models.Model):
     solution = models.ForeignKey('Solution', related_name='pdogs')
     pwalker = models.ForeignKey('PWalker', related_name='carrying', null=True)
     node = models.ForeignKey('graph.Node')
-    walked = models.BooleanField(default=False)
+    walked = models.PositiveIntegerField(default=0)
     carried = models.BooleanField(default=False)
 
     def get_desirable_times(self):
         return [(rw.after, rw.before) for rw in self.dog.requiredwalks.all()]
     
     def play(self): #fix this for multiple days
-        self.walked = True
+        self.walked += 1
         self.events.create(time = self.pwalker.time, type='Walk')
         self.save()
 
+    def get_required_walk(self, time):
+        rw = self.dog.requiredwalks.filter(date = time.date())
+        
+        if not rw:
+            rw = self.dog.requiredwalks.filter(days = DAYS[time.weekday()])
+        
+        if rw:
+            return rw[0]
+
     def during_a_required_time(self, time):
-        for t in self.get_desirable_times():
-            if time >= t[0] and time <= t[1]:
-                return REQUIRED #required to walk during this time
+        rw = self.get_required_walk(time)
+        if rw and time.time() >= rw.after and time.time() <= rw.before:
+            return REQUIRED #required to walk during this time
         return 0        
 
     def walked_during_last_day(self, time):
@@ -393,6 +398,12 @@ class PDog(models.Model):
             return ABSOLUTELY_NOT
         return 0    
 
+    def weight_based_on_multiple_walks(self, time):
+        rw = self.get_required_walk(time)
+        if rw and self.walked < rw.count:
+            return ABSOLUTELY_NOT
+        return 0    
+    
     def weight_based_on_until(self, time):
         for rw in self.dog.requiredwalks.all():
             if rw.date == time.date() and time.time() < rw.until:
@@ -423,6 +434,7 @@ class PDog(models.Model):
         s += self.weight_based_on_days()
         s += self.weight_based_on_spacing(time)
         s += self.weight_based_on_until(time)
+        s += self.weight_based_on_multiple_walks(time)
         s += self.cancelled(time)
         return s
 
@@ -464,7 +476,7 @@ class PDog(models.Model):
         return s
 
     def next_date(self):
-        self.walked = False
+        self.walked = 0
         self.save()
     
     def validate(self):
