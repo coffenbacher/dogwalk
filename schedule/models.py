@@ -325,9 +325,13 @@ class PWalker(models.Model):
         if not self.all_dogs_ready():
             self.log('already walked dogs')
             self.drop_closest()
+        
         self.node = self.get_play_location().node
-        [pdog.play() for pdog in self.carrying.all()]
-        self.save()
+        if PWalker.objects.exclude(pk=self.pk).filter(node = self.node):
+            self.wait(minutes=10) 
+        else:
+            [pdog.play() for pdog in self.carrying.all()]
+            self.save()
         
     def get_play_location(self):
         return self.solution.schedule.walkinglocations.all()[0]
