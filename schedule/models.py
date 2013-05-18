@@ -223,7 +223,7 @@ class PWalker(models.Model):
         return self.done_with_dogs() and self.node == self.walker.node
         
     def done_with_dogs(self):
-        return not self.carrying.count()
+        return not self.carrying.count() and not self.solution.available().count()
     
     def start_day(self):
         d = self.time + datetime.timedelta(days=1)
@@ -243,14 +243,13 @@ class PWalker(models.Model):
 
     def go_home(self):
         self.log('planning home')
-        if self.all_dogs_ready():
+        if not self.carrying.all():
+            self.drive_home()
+        elif self.all_dogs_want_to_walk():
             self.play()
         elif self.carrying.all().count():
             self.drop_closest()
-        elif self.home():
-            self.wait(minutes=20) 
-        else:
-            self.drive_home()
+        self.log('confused')    
 
     def wait(self, **kwargs):
         self.log('waiting')
@@ -267,9 +266,9 @@ class PWalker(models.Model):
 
     def drop_or_play(self):
         self.log('drop or play?')
-        if self.full(walked=0) or self.all_dogs_ready() or self.last_trip():
+        if self.full(walked=0) or self.all_dogs_want_to_walk() or self.last_trip():
             self.play()
-        elif not self.all_dogs_ready():
+        elif not self.all_dogs_want_to_walk():
             self.drop_closest()
         else:
             self.end_day()
@@ -281,8 +280,8 @@ class PWalker(models.Model):
         best = sorted(pdogs, key=lambda n: n.score(self))
         
         for b in best:
-            rw = b.get_required_walk(self.time())
-            if rw and b.walked >= rw.count or not rw and b.walked:
+            rw = b.get_required_walk(self.time)
+            if b.pwalker == self and (rw and b.walked >= rw.count or not rw and b.walked):
                 self.drop(b)
                 break
             elif b.score(self) > 0:
@@ -322,8 +321,8 @@ class PWalker(models.Model):
     
     def play(self):
         self.log('play')
-        if not self.all_dogs_ready():
-            self.log('already walked dogs')
+        if not self.all_dogs_want_to_walk():
+            self.log('already walked at least all but 1 dogs')
             self.drop_closest()
         
         self.node = self.get_play_location().node
@@ -339,10 +338,10 @@ class PWalker(models.Model):
     def full(self, *args, **kwargs):
         return self.carrying.filter(**kwargs).count() == self.capacity
 
-    def all_dogs_ready(self):
-        for pd in self.carrying.all(walked__gte = 1):
-            rw = self.dog.requiredwalks.filter(date = self.time.date())
-            if not rw or pd.walked > rw.count:
+    def all_dogs_want_to_walk(self):
+        for pd in self.carrying.filter(walked__gte = 1):
+            rw = pd.dog.requiredwalks.filter(date = self.time.date())
+            if not rw or pd.walked > rw[0].count:
                 return False
         return True
 
@@ -388,7 +387,7 @@ class PDog(models.Model):
         rw = self.dog.requiredwalks.filter(date = time.date())
         
         if not rw:
-            rw = self.dog.requiredwalks.filter(days = DAYS[time.weekday()])
+            rw = self.dog.requiredwalks.filter(days = DAYS[time.weekday()][0])
         
         if rw:
             return rw[0]
