@@ -1,4 +1,6 @@
 import datetime
+from rq import Queue
+from worker import conn
 from dog.helpers import basic_solution
 from schedule.models import *
 from django.shortcuts import render_to_response
@@ -9,7 +11,10 @@ import json
 def home(request):
     
     if request.method == 'POST' or not Schedule.objects.all():
-        basic_solution()
+
+        q = Queue(connection=conn)
+        q.enqueue(basic_solution)
+        
 
     w = Schedule.objects.all()[0] 
     return render_to_response('home.html', {'w': w})
