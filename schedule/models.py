@@ -1,4 +1,5 @@
 from dateutil import parser
+from dogwalk.logformats import MSLogEntry
 import datetime
 import inspect
 import logging
@@ -14,13 +15,13 @@ mv_logger = logging.getLogger('MV')
 
 # Create your models here.
 DAYS = (
-        (0, 'Monday'),
-        (1, 'Tuesday'),
-        (2, 'Wednesday'),
-        (3, 'Thursday'),
-        (4, 'Friday'),
-        (5, 'Saturday'),
-        (6, 'Sunday'),
+        ('Monday'),
+        ('Tuesday'),
+        ('Wednesday'),
+        ('Thursday'),
+        ('Friday'),
+        ('Saturday'),
+        ('Sunday'),
         )
 
 ABSOLUTELY_NOT = 10**5
@@ -243,13 +244,14 @@ class PWalker(models.Model):
 
     def go_home(self):
         self.log('planning home')
-        if not self.carrying.all():
+        if not self.carrying.all().count():
             self.drive_home()
         elif self.all_dogs_want_to_walk():
             self.play()
         elif self.carrying.all().count():
             self.drop_closest()
         self.log('confused')    
+        self.wait(minutes=10)
 
     def wait(self, **kwargs):
         self.log('waiting')
@@ -305,9 +307,7 @@ class PWalker(models.Model):
         self.carrying.remove(pdog)
         self.save(action='Drop off')
 
-        pdog.pwalker = None
-        pdog.carried = False
-        pdog.save()
+        pdog.dropped_off(self)
     
     def pick(self, pdog):
         self.log('pick %s' % pdog)
@@ -315,9 +315,7 @@ class PWalker(models.Model):
         self.carrying.add(pdog)
         self.save(action='Pick up')
         
-        pdog.carried = True
-        pdog.pwalker = self
-        pdog.save()
+        pdog.picked_up(self)
     
     def play(self):
         self.log('play')
@@ -383,19 +381,53 @@ class PDog(models.Model):
         self.events.create(time = self.pwalker.time, pwalker = self.pwalker, type='Walk')
         self.save()
 
+    def picked_up(self, pwalker):
+        self.carried = True
+        self.pwalker = pwalker
+        self.save()
+        self.events.create(time = self.pwalker.time, pwalker = self.pwalker, type='Picked up')
+
+    def dropped_off(self, pwalker):
+        self.events.create(time = pwalker.time, pwalker = pwalker, type='Dropped off')
+        self.pwalker = None
+        self.carried = False
+        self.save()
+
     def get_required_walk(self, time):
         rw = self.dog.requiredwalks.filter(date = time.date())
         
         if not rw:
-            rw = self.dog.requiredwalks.filter(days = DAYS[time.weekday()][0])
+            rw = self.dog.requiredwalks.filter(days = RequiredWalk.days.__getattr__(DAYS[time.weekday()]))
         
         if rw:
             return rw[0]
 
     def during_a_required_time(self, time):
         rw = self.get_required_walk(time)
-        if rw and time.time() >= rw.after and time.time() <= rw.before:
-            return REQUIRED #required to walk during this time
+        any_rw = self.dog.requiredwalks.exists() # BUG specific date required walks will break this. should only be for generic days
+        
+        # If required walks are set for this dog then we need to respect them
+        if any_rw:
+           # If there is a required walk today we need to respect it. Otherwise we're not walking today.
+           if rw:
+               if rw.after and rw.before:
+                   if time.time() >= rw.after and time.time() <= rw.before:
+                       return REQUIRED #required to walk during this time
+                   else:
+                       return ABSOLUTELY_NOT + 14
+               if rw.after:
+                   if time.time() >= rw.after:
+                       return REQUIRED
+                   else:
+                       return ABSOLUTELY_NOT + 15
+               if rw.before:
+                   if time.time() <= rw.before:
+                       return REQUIRED
+                   else:
+                       return ABSOLUTELY_NOT + 16
+               return REQUIRED
+           else:
+               return ABSOLUTELY_NOT + 17
         return 0        
 
     def walked_during_last_day(self, time):
@@ -449,33 +481,16 @@ class PDog(models.Model):
             return 100
 
     def get_time_desirability(self, time):
-        s = 0
-        s += self.during_a_required_time(time)
-        s += self.walked_during_last_day(time)
-        s += self.walked_too_many_times_during_last_week(time)
-        s += self.weight_based_on_days()
-        s += self.weight_based_on_spacing(time)
-        s += self.weight_based_on_until(time)
-        s += self.weight_based_on_multiple_walks(time)
-        s += self.cancelled(time)
+        s = {}
+        s['required'] = self.during_a_required_time(time)
+        s['during_last_day'] = self.walked_during_last_day(time)
+        s['too_many'] = self.walked_too_many_times_during_last_week(time)
+        s['weight_days'] = self.weight_based_on_days()
+        s['spacing'] = self.weight_based_on_spacing(time)
+        s['until'] = self.weight_based_on_until(time)
+        s['multiple'] = self.weight_based_on_multiple_walks(time)
+        s['cancelled'] = self.cancelled(time)
         return s
-
-    def log(self, a, pwalker, d, w, i, t, s):
-        d = {
-            'context'       :   inspect.stack()[3][3] + ' '*100,
-            'walker'        :   pwalker.walker.name,
-            'w_node'        :   pwalker.node,
-            'dog'           :   self,
-            'd_node'        :   self.node,
-            'time'          :   pwalker.time,
-            'd'             :   d,
-            'w'             :   w,
-            'i'             :   i,
-            't'             :   t,
-            'score'         :   s,
-        }
-            
-        ms_logger.debug(a, extra=d)
 
     def get_walked_times(self, **kwargs):
         return self.events.filter(type='Walk').filter(**kwargs)
@@ -489,13 +504,16 @@ class PDog(models.Model):
         return 0    
         
     def score(self, pwalker):
-        d = self.node.get_distance(pwalker.node)
-        w = self.being_walked()
-        i = self.incompatible_dogs(pwalker.carrying.all())
-        t = self.get_time_desirability(pwalker.time)
-        sw = self.get_same_walker(pwalker)
-        s = d + t + w + i
-        self.log(' ', pwalker, d, w, i, t, s)
+        score = {}
+        score['distance'] = self.node.get_distance(pwalker.node)
+        score['being_walked'] = self.being_walked()
+        score['incompatible_dogs'] = self.incompatible_dogs(pwalker.carrying.all())
+        score['time'] = self.get_time_desirability(pwalker.time)
+        score['same_walker'] = self.get_same_walker(pwalker)
+        s = sum((score['distance'], score['being_walked'], score['incompatible_dogs'], sum(score['time'].values()), score['same_walker']))
+        
+        ms_logger.debug(MSLogEntry(pwalker, self, s, score))
+        
         return s
 
     def next_date(self):
@@ -506,32 +524,41 @@ class PDog(models.Model):
         events = self.get_walked_times()
         s = self.solution.schedule.start
         w = self.solution.schedule.end
-        week_events = events.filter(time__gte = s, time__lte = w) # fix for multiple weeks
+        walked_events = events.filter(time__gte = s, time__lte = w) # fix for multiple weeks
         cancellations = self.dog.cancellations.filter(date__gte = s, date__lte = w)
-        if week_events.count() + cancellations.count() != self.dog.days:
-            res = False
-        else:
-            res = all([self.__validate_required(week_events, rw) for rw in self.dog.requiredwalks.all()])
+        
+        res = (walked_events.count() + cancellations.count() == self.dog.days)
+        
+
+        if self.dog.requiredwalks.exists():
+            all_week_events = self.events.filter(time__gte = s, time__lte = w)
+            res = res and all([self.__validate_required(all_week_events, rw) for rw in self.dog.requiredwalks.all()])
         
         d = {
             'start'         : s,
             'end'           : w,
             'dog'           : self.dog,
             'days'          : self.dog.days,
-            'events'        : week_events.count(),
+            'events'        : walked_events.count(),
             'cancellations' : cancellations.count(),
         }
         mv_logger.debug(str(res), extra=d)
         
-        #required = self.dog.requiredwalks.all()
-        #for r in required: 
         return res
     
     def __validate_required(self, events, rw):
         for e in events:
-            if e.time >= rw.after and e.time <= rw.before:
-                return True
-        return False        
+            print self.dog.name, e.time.time()
+            if rw.after and e.time.time() <= rw.after:
+                print "f"
+                return False
+            if rw.before and e.time.time() >= rw.before:
+                print "f"
+                return False
+            if rw.days and not rw.days.__getattr__(DAYS[e.time.weekday()]):
+                print "f"
+                return False
+        return True        
             
 
 

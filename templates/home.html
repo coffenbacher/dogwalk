@@ -3,6 +3,14 @@
 
 {% block content %}
   <h1>Weekly Schedule</h1>
+  <div>
+    <form method="POST">
+        <input type="submit" class="btn btn-large" value="Recalculate schedule">
+    </form>
+    <form method="POST" action="/graph/edge/">
+        <input type="submit" class="btn btn-large" value="Refresh distances">
+    </form>
+  </div>
   <p>
     {% for l in w.entries_by_day %}
     <h2>{{ l.0|date:"D M d" }}</h2>
@@ -45,13 +53,5 @@
     </table>
     {% endfor %}
   </p>-->
-  <div>
-    <form method="POST">
-        <input type="submit" class="btn btn-large" value="Recalculate schedule">
-    </form>
-    <form method="POST" action="/graph/edge/">
-        <input type="submit" class="btn btn-large" value="Refresh distances">
-    </form>
-  </div>
   {% endblock %}
 

@@ -1,6 +1,7 @@
 # Django settings for dogwalk project.
 import os
 import sys
+import json
 
 PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -139,6 +140,7 @@ INSTALLED_APPS = (
 # the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -150,7 +152,7 @@ LOGGING = {
             'format': '%(levelname)s\t%(time).16s\t%(walker).6s\t%(node).12s\t%(carrying).80s\t%(message)s'
         },
         'MS': {
-            'format': '%(levelname)s\t%(time).16s\t%(context).12s\t%(walker).6s\t%(dog).6s\td:%(d)d\tw:%(w)d\tt:%(t)d\t%(score)d\t%(message)s'
+            'format': '%(message)s'
         },
         'MV': {
             'format': '%(levelname)s\t%(start).16s\t%(end).16s\t\t%(dog).6s\t%(days)d\t%(events)d\t%(cancellations)s\t%(message)s'

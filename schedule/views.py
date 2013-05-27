@@ -39,4 +39,6 @@ def map(request, pk):
 
 def dogs(request, pk):
     w = Schedule.objects.all()[0]
+    for d in w.main_solution.pdogs.all():
+        d.validate()
     return render_to_response('schedule/dogs.html', {'w': w})
