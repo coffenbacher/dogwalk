@@ -13,7 +13,7 @@ def home(request):
     if request.method == 'POST' or not Schedule.objects.all():
 
         q = Queue(connection=conn)
-        q.enqueue(basic_solution, args=(self,), kwargs={}, timeout=10000)
+        q.enqueue(basic_solution, args=(), kwargs={}, timeout=10000)
         
 
     w = Schedule.objects.all()[0] 
