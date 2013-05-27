@@ -11,7 +11,7 @@ class Edge(models.Model):
 
 class Node(models.Model):
     address = models.TextField()
-    seconds = models.FloatField(default=420)
+    seconds = models.FloatField(default=120)
 
     @classmethod
     def create_edges(cls):
