@@ -193,6 +193,7 @@ class PWalker(models.Model):
     solution = models.ForeignKey('Solution', related_name='pwalkers')
     walker = models.ForeignKey('dog.Walker')
     capacity = models.PositiveIntegerField(default=9)
+    play_capacity = models.PositiveIntegerField(default=8)
     last_entry = models.OneToOneField('SolutionEntry', related_name='last_pwalker', null=True)
     node = models.ForeignKey('graph.Node')
     time = models.DateTimeField()
@@ -215,7 +216,10 @@ class PWalker(models.Model):
             self.log('done')
         elif self.done_with_dogs() or self.time.time() > self.walker.end_time:
             self.end_day()
-        elif (self.carrying.count() >= self.capacity) or not self.solution.available().count():
+        elif (
+            self.carrying.filter(walked=0).count() >= self.play_capacity 
+            or self.carrying.count() >= self.capacity 
+            or not self.solution.available().count() ):
             self.drop_or_play()
         else:    
             self.drop_or_pick()

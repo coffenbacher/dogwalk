@@ -1,0 +1,33 @@
+{
+    "turn"  :   {
+
+
+
+
+    }
+    "actions": 
+        {
+            "home"  :   
+                {
+                    "necessary" : ["Carrying no dogs"],
+                    "trigger"   : ["After working hours OR no dogs available"]
+                }
+            "pick"  :   
+                {
+                    "necessary" : ["At least one dog available"],
+                    "trigger"   : [],
+                    "optional"  : ["During working hours"]
+                }
+            "drop"  :   
+                {
+                    "necessary" : ["Carrying at least one walked dog"],
+                    "trigger"   : ["Capacity is full", "After working hours"],
+                    "optional"  : ["During working hours"]
+                }
+            "play"  :   
+                {
+                    "necessary" : ["Carrying at least one unwalked dog"],
+                    "trigger"   : ["Capacity is full AND NOT *drop*", "No dogs available"]
+                }
+        }
+}
