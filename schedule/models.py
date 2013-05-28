@@ -24,7 +24,12 @@ DAYS = (
         ('Sunday'),
         )
 
+MAYBE_NOT = 10**3
+PROBABLY_NOT = 10**4
 ABSOLUTELY_NOT = 10**5
+
+SLIGHTLY = -10**2
+MAYBE = 10**3
 REQUIRED = -10**6
 
 class Schedule(TimeStampedModel):
@@ -250,13 +255,16 @@ class PWalker(models.Model):
         self.log('planning home')
         if not self.carrying.all().count():
             self.drive_home()
+            return
         elif self.all_dogs_want_to_walk():
             self.play()
+            return
         elif self.carrying.all().count():
             self.drop_closest()
+            return
         self.log('confused')    
         self.wait(minutes=10)
-
+        
     def wait(self, **kwargs):
         self.log('waiting')
         self.time += datetime.timedelta(**kwargs)
@@ -266,6 +274,7 @@ class PWalker(models.Model):
         self.log('drove home')
         self.node = self.walker.node
         self.save()
+        self.wait(hours = 1)
 
     def home(self):
         return self.node == self.walker.node
@@ -496,6 +505,16 @@ class PDog(models.Model):
         s['cancelled'] = self.cancelled(time)
         return s
 
+    def other_dogs_at_location(self, pwalker):
+        #TODO perf boost by changing this to radius
+        if not pwalker.node.address == self.dog.node.address:
+            pds = PDog.objects.filter(dog__node__address = self.dog.node.address)
+            if pwalker.play_capacity - pwalker.carrying.count() - pds.count() < 0:
+                return PROBABLY_NOT * pds.count()
+            return MAYBE * (pds.count() - 1)
+        
+        return MAYBE # we're already here, better take care of business   
+
     def get_walked_times(self, **kwargs):
         return self.events.filter(type='Walk').filter(**kwargs)
     
@@ -513,8 +532,9 @@ class PDog(models.Model):
         score['being_walked'] = self.being_walked()
         score['incompatible_dogs'] = self.incompatible_dogs(pwalker.carrying.all())
         score['time'] = self.get_time_desirability(pwalker.time)
+        score['other_dogs_at_location'] = self.other_dogs_at_location(pwalker)
         score['same_walker'] = self.get_same_walker(pwalker)
-        s = sum((score['distance'], score['being_walked'], score['incompatible_dogs'], sum(score['time'].values()), score['same_walker']))
+        s = sum((score['distance'], score['being_walked'], score['incompatible_dogs'], sum(score['time'].values()), score['same_walker'], score['other_dogs_at_location']))
         
         ms_logger.debug(MSLogEntry(pwalker, self, s, score))
         
