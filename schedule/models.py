@@ -486,6 +486,14 @@ class PDog(models.Model):
             return 1000000
         return 0    
 
+    def get_preferred_walker(self, pwalker):
+        try:
+            if self.dog.preferredwalker != pwalker.walker:
+                return ABSOLUTELY_NOT
+        except:
+            pass
+        return 0    
+
     def get_same_walker(self, pwalker):
         s = 0
         if self.events.filter(type='Walk').exclude(pwalker=pwalker):
@@ -534,7 +542,8 @@ class PDog(models.Model):
         score['time'] = self.get_time_desirability(pwalker.time)
         score['other_dogs_at_location'] = self.other_dogs_at_location(pwalker)
         score['same_walker'] = self.get_same_walker(pwalker)
-        s = sum((score['distance'], score['being_walked'], score['incompatible_dogs'], sum(score['time'].values()), score['same_walker'], score['other_dogs_at_location']))
+        score['preferred_walker'] = self.get_preferred_walker(pwalker)
+        s = sum((score['distance'], score['being_walked'], score['incompatible_dogs'], sum(score['time'].values()), score['same_walker'], score['other_dogs_at_location'], score['preferred_walker']))
         
         ms_logger.debug(MSLogEntry(pwalker, self, s, score))
         
