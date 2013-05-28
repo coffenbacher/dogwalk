@@ -1,0 +1,2 @@
+Find scores for dogs at same location
+cat MS.log | ack-grep '09:05.*Sam Baron.*108.*108' -C 2
