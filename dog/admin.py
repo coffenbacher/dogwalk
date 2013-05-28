@@ -13,6 +13,9 @@ class DogAdminForm(forms.ModelForm):
         }
         exclude = ['node']
 
+class PreferredWalkerAdmin(admin.ModelAdmin):
+    pass
+
 class WalkerAdmin(admin.ModelAdmin):
     exclude = ['node']
 
@@ -35,3 +38,4 @@ admin.site.register(Dog, DogAdmin)
 admin.site.register(Walker, WalkerAdmin)
 admin.site.register(RequiredWalk, RequiredWalkAdmin)
 admin.site.register(CancelledWalk, CancelledWalkAdmin)
+admin.site.register(PreferredWalker, PreferredWalkerAdmin)

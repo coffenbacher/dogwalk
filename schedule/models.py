@@ -488,7 +488,7 @@ class PDog(models.Model):
 
     def get_preferred_walker(self, pwalker):
         try:
-            if self.dog.preferredwalker != pwalker.walker:
+            if self.dog.preferredwalker.walker != pwalker.walker:
                 return ABSOLUTELY_NOT
         except:
             pass
